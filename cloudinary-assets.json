@@ -1,0 +1,95 @@
+{
+  "assets": {
+    "/videos/deep-focus-music.mp3": {
+      "secureUrl": "https://res.cloudinary.com/tthwqiqa/video/upload/v1785436655/riskmaster/deep-focus-music.mp3",
+      "publicId": "riskmaster/deep-focus-music",
+      "resourceType": "video",
+      "bytes": 95800048
+    },
+    "/videos/motivation-power-music.mp3": {
+      "secureUrl": "https://res.cloudinary.com/tthwqiqa/video/upload/v1785436703/riskmaster/motivation-power-music.mp3",
+      "publicId": "riskmaster/motivation-power-music",
+      "resourceType": "video",
+      "bytes": 29958405
+    },
+    "/videos/novatech-risk-analysis.mp4": {
+      "secureUrl": "https://res.cloudinary.com/tthwqiqa/video/upload/v1785436741/riskmaster/novatech-risk-analysis.mp4",
+      "publicId": "riskmaster/novatech-risk-analysis",
+      "resourceType": "video",
+      "bytes": 14370246
+    },
+    "/videos/novatech-risk-identification.mp4": {
+      "secureUrl": "https://res.cloudinary.com/tthwqiqa/video/upload/v1785441148/riskmaster/novatech-risk-identification.mp4",
+      "publicId": "riskmaster/novatech-risk-identification",
+      "resourceType": "video",
+      "bytes": 36751317
+    },
+    "/videos/novatech-risk-manager-intro.mp4": {
+      "secureUrl": "https://res.cloudinary.com/tthwqiqa/video/upload/v1785438894/riskmaster/novatech-risk-manager-intro.mp4",
+      "publicId": "riskmaster/novatech-risk-manager-intro",
+      "resourceType": "video",
+      "bytes": 59191511
+    },
+    "/videos/petronova-risk-analysis.mp4": {
+      "secureUrl": "https://res.cloudinary.com/tthwqiqa/video/upload/v1785438920/riskmaster/petronova-risk-analysis.mp4",
+      "publicId": "riskmaster/petronova-risk-analysis",
+      "resourceType": "video",
+      "bytes": 14489942
+    },
+    "/videos/petronova-risk-identification.mp4": {
+      "secureUrl": "https://res.cloudinary.com/tthwqiqa/video/upload/v1785439061/riskmaster/petronova-risk-identification.mp4",
+      "publicId": "riskmaster/petronova-risk-identification",
+      "resourceType": "video",
+      "bytes": 80244928
+    },
+    "/videos/petronova-risk-manager-intro.mp4": {
+      "secureUrl": "https://res.cloudinary.com/tthwqiqa/video/upload/v1785439216/riskmaster/petronova-risk-manager-intro.mp4",
+      "publicId": "riskmaster/petronova-risk-manager-intro",
+      "resourceType": "video",
+      "bytes": 87335410
+    },
+    "/videos/petronova-risk-monitoring-control-stage-4.mp4": {
+      "secureUrl": "https://res.cloudinary.com/tthwqiqa/video/upload/v1785439281/riskmaster/petronova-risk-monitoring-control-stage-4.mp4",
+      "publicId": "riskmaster/petronova-risk-monitoring-control-stage-4",
+      "resourceType": "video",
+      "bytes": 26117038
+    },
+    "/videos/petronova-risk-response.mp4": {
+      "secureUrl": "https://res.cloudinary.com/tthwqiqa/video/upload/v1785439425/riskmaster/petronova-risk-response.mp4",
+      "publicId": "riskmaster/petronova-risk-response",
+      "resourceType": "video",
+      "bytes": 86601583
+    },
+    "/videos/project-atlas-issue-management.mp4": {
+      "secureUrl": "https://res.cloudinary.com/tthwqiqa/video/upload/v1785439556/riskmaster/project-atlas-issue-management.mp4",
+      "publicId": "riskmaster/project-atlas-issue-management",
+      "resourceType": "video",
+      "bytes": 71690529
+    },
+    "/videos/project-atlas-risk-identification.mp4": {
+      "secureUrl": "https://res.cloudinary.com/tthwqiqa/video/upload/v1785440229/riskmaster/project-atlas-risk-identification.mp4",
+      "publicId": "riskmaster/project-atlas-risk-identification",
+      "resourceType": "video",
+      "bytes": 63115469
+    },
+    "/videos/project-atlas-risk-manager-intro.mp4": {
+      "secureUrl": "https://res.cloudinary.com/tthwqiqa/video/upload/v1785439948/riskmaster/project-atlas-risk-manager-intro.mp4",
+      "publicId": "riskmaster/project-atlas-risk-manager-intro",
+      "resourceType": "video",
+      "bytes": 97146174
+    },
+    "/videos/project-atlas-risk-response.mp4": {
+      "secureUrl": "https://res.cloudinary.com/tthwqiqa/video/upload/v1785440012/riskmaster/project-atlas-risk-response.mp4",
+      "publicId": "riskmaster/project-atlas-risk-response",
+      "resourceType": "video",
+      "bytes": 31135891
+    },
+    "/images/vr-background.gif": {
+      "secureUrl": "https://res.cloudinary.com/tthwqiqa/image/upload/v1785440024/riskmaster/vr-background.gif",
+      "publicId": "riskmaster/vr-background",
+      "resourceType": "image",
+      "bytes": 2729154
+    }
+  },
+  "failures": {}
+}
