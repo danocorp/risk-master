@@ -399,7 +399,7 @@ function HomeScreen({ selectedCategoryId, onSelectCategory }) {
       </section>
 
       <footer className="home-credit">
-        Developed by <a href="https://danozone.com" target="_blank" rel="noreferrer">Danozone</a>
+        Developed by <a href="https://danozonedigital.com" target="_blank" rel="noreferrer">Danozone</a>
       </footer>
     </section>
   );
