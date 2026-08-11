@@ -18,7 +18,7 @@ import { assetUrl } from './data/cloudinaryAssets.js';
 
 const STORAGE_KEY = 'riskmaster-staged-simulator-state-v3';
 const DEFAULT_STATE = {
-  selectedCategoryId: 'cybersecurity',
+  selectedCategoryId: 'automobile',
   screen: 'home',
   stageIndex: 0,
   itemIndex: 0,
@@ -133,6 +133,14 @@ function App() {
     persist(DEFAULT_STATE);
     setAnswerFlash('');
     scrollHome();
+  };
+
+  const playOtherGames = () => {
+    persist({ ...DEFAULT_STATE, screen: 'home' });
+    setAnswerFlash('');
+    window.setTimeout(() => {
+      document.getElementById('categories')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
   };
 
   const startCategory = (categoryId) => {
@@ -297,6 +305,7 @@ function App() {
             finalBand={finalBand}
             onRetry={() => startCategory(category.id)}
             onHome={resetHome}
+            onOtherGames={playOtherGames}
           />
         ) : null}
       </main>
@@ -396,6 +405,9 @@ function PreviewScreen({ category, onBack }) {
 function BriefingScreen({ category, stage, stageIndex, totalStages, onBack, onNext }) {
   const briefing = stage.type === 'briefing' ? stage : stage.briefing;
   const isActivityStage = stage.type !== 'briefing';
+  const isProjectBrief = stage.type === 'briefing';
+  const briefTitle = isProjectBrief ? 'Project brief' : 'Stage brief';
+  const briefText = isProjectBrief ? (briefing.projectBrief || category.projectBrief || briefing.summary) : (briefing.stageBrief || briefing.summary);
   const videoRef = useRef(null);
   const briefingVideoSrc = assetUrl(briefing.videoSrc);
 
@@ -467,7 +479,11 @@ function BriefingScreen({ category, stage, stageIndex, totalStages, onBack, onNe
         <div className="briefing-copy">
           <span>{briefing.label}</span>
           <h2>{briefing.title}</h2>
-          <p>{briefing.summary}</p>
+          <div className="briefing-note">
+            <strong>{briefTitle}</strong>
+            <p>{briefText}</p>
+          </div>
+          <InstructionPanel stage={stage} />
         </div>
       </article>
 
@@ -492,6 +508,25 @@ function ActivityScreen(props) {
   if (props.stage.type === 'quiz') return <QuizActivity {...props} />;
   if (props.stage.type === 'multiQuiz') return <MultiQuizActivity {...props} />;
   return null;
+}
+
+function InstructionPanel({ stage }) {
+  const copy = {
+    briefing: 'Review the written brief as well as the video, then continue to the next stage when the project context is clear.',
+    identify: 'Read each signal, decide whether it is a material project risk, then tap the option that should go into the risk register.',
+    analysis: 'Tap one heatmap cell for each risk. Probability is rated 1-5 from very low to very high. Impact is rated 1-5 from negligible to catastrophic. The risk score is Probability x Impact.',
+    response: 'Read the specific risk signal, compare the five response strategies, then tap the strategy that best fits that risk exposure.',
+    quiz: 'Read the live scenario, choose the strongest next action, then continue after your decision is recorded.',
+    multiQuiz: 'Select every option that applies to the reflection prompt, then continue once your selections are recorded.',
+  };
+  const instruction = stage.instructions || copy[stage.type] || copy.briefing;
+
+  return (
+    <div className="instruction-panel">
+      <strong>What to do next</strong>
+      <p>{instruction}</p>
+    </div>
+  );
 }
 
 function IdentificationActivity({ category, stage, stageState, itemIndex, setItemIndex, updateStageState, onBack, onFinish }) {
@@ -526,6 +561,7 @@ function IdentificationActivity({ category, stage, stageState, itemIndex, setIte
       <ActivityTopbar itemIndex={itemIndex} totalItems={stage.risks.length} onBack={onBack} />
       <article key={item.id} className="question-card question-enter">
         <StageHeader category={category} stage={stage} />
+        <InstructionPanel stage={stage} />
         <div className="scenario-strip signal-alert">
           <span>{item.scenarioTag ? `${item.scenarioTag} - ${item.scenario || 'Risk signal'}` : item.scenario || 'Risk signal'}</span>
           <p>{item.signal}</p>
@@ -584,7 +620,7 @@ function AnalysisActivity({ category, stage, stageState, itemIndex, setItemIndex
     showHintPopup({
       category,
       title: `Risk score ${probability * impact}`,
-      text: `You placed this at Probability ${probability} x Impact ${impact}. Scores within plus or minus 4 of the expected score earn points.`,
+      text: `Placement saved at Probability ${probability} x Impact ${impact}. Continue when your judgement matches the risk signal.`,
       icon: 'info',
     });
   };
@@ -602,20 +638,19 @@ function AnalysisActivity({ category, stage, stageState, itemIndex, setItemIndex
       <ActivityTopbar itemIndex={itemIndex} totalItems={stage.risks.length} onBack={onBack} />
       <article key={risk.id} className="question-card matrix-card question-enter">
         <StageHeader category={category} stage={stage} />
+        <InstructionPanel stage={stage} />
         <div className="scenario-strip">
           <span>Analyze this risk</span>
           <p>{risk.signal}</p>
         </div>
         <div
           className={`risk-token ${placement ? 'placed' : ''}`}
-          draggable
-          onDragStart={(event) => event.dataTransfer.setData('text/plain', risk.id)}
         >
           <strong>{risk.title}</strong>
           <span>
             {placement
               ? `Placed at P${placement.probability} x I${placement.impact} = ${placement.probability * placement.impact}`
-              : 'Drag onto the matrix or tap a cell'}
+              : 'Tap a matrix cell to place this risk'}
           </span>
         </div>
         <RiskMatrix onPlace={placeRisk} placement={placement} />
@@ -685,11 +720,6 @@ function RiskMatrix({ onPlace, placement }) {
           type="button"
           className={`matrix-cell ${heat.className} ${active ? 'active' : ''}`}
           onClick={() => onPlace(probability.value, impact.value)}
-          onDragOver={(event) => event.preventDefault()}
-          onDrop={(event) => {
-            event.preventDefault();
-            onPlace(probability.value, impact.value);
-          }}
         >
           <span>{heat.label}</span>
           <strong>{probability.value * impact.value}</strong>
@@ -725,8 +755,8 @@ function ResponseActivity({ category, stage, stageState, itemIndex, setItemIndex
     showHintPopup({
       category,
       title: `${strategy} selected`,
-      text: risk.feedback?.[strategy] || 'Use the response type that best fits the risk exposure.',
-      icon: strategy === risk.response ? 'success' : 'info',
+      text: 'Your response choice has been saved. The scoreboard will assess it after the stage.',
+      icon: 'info',
     });
   };
 
@@ -735,6 +765,7 @@ function ResponseActivity({ category, stage, stageState, itemIndex, setItemIndex
       <ActivityTopbar itemIndex={itemIndex} totalItems={stage.risks.length} onBack={onBack} />
       <article key={risk.id} className="question-card question-enter">
         <StageHeader category={category} stage={stage} />
+        <InstructionPanel stage={stage} />
         <div className="scenario-strip">
           <span>Risk response target</span>
           <p>{risk.signal}</p>
@@ -742,7 +773,7 @@ function ResponseActivity({ category, stage, stageState, itemIndex, setItemIndex
         <strong className="risk-title">{risk.title}</strong>
         <h2>Which response strategy best fits this risk?</h2>
         <div className="strategy-grid">
-          {stage.strategies.map((strategy) => (
+          {getStrategyOrder(stage.strategies, risk.id).map((strategy) => (
             <button
               key={strategy}
               type="button"
@@ -756,8 +787,8 @@ function ResponseActivity({ category, stage, stageState, itemIndex, setItemIndex
         </div>
         {selected ? (
           <div className="feedback-card feedback-enter">
-            <span>{gradeRiskResponse(risk, selected).label}</span>
-            <p>{risk.feedback?.[selected] || 'Use the response type that best fits the risk exposure.'}</p>
+            <span>Choice captured</span>
+            <p>Your strategy has been recorded. You can continue or revise before scoring the stage.</p>
           </div>
         ) : null}
       </article>
@@ -797,9 +828,9 @@ function QuizActivity({ category, stage, stageState, itemIndex, setItemIndex, up
     setAnswerFlash(optionId);
     showHintPopup({
       category,
-      title: selected?.score ? 'Nice move' : 'Decision logged',
-      text: selected?.feedback || 'Your choice has been recorded.',
-      icon: selected?.score ? 'success' : 'info',
+      title: 'Decision logged',
+      text: 'Your choice has been recorded. The stage scoreboard will show how the decision performed.',
+      icon: 'info',
     });
   };
 
@@ -808,6 +839,7 @@ function QuizActivity({ category, stage, stageState, itemIndex, setItemIndex, up
       <ActivityTopbar itemIndex={itemIndex} totalItems={stage.questions.length} onBack={onBack} />
       <article key={question.id} className="question-card question-enter">
         <StageHeader category={category} stage={stage} />
+        <InstructionPanel stage={stage} />
         <div className="scenario-strip">
           <span>Scenario</span>
           <p>{question.context}</p>
@@ -829,8 +861,8 @@ function QuizActivity({ category, stage, stageState, itemIndex, setItemIndex, up
         </div>
         {selectedOption ? (
           <div className="feedback-card feedback-enter">
-            <span>{selectedOption.score >= 8 ? 'Strong decision' : selectedOption.score >= 4 ? 'Partial control' : 'High exposure'}</span>
-            <p>{selectedOption.feedback}</p>
+            <span>Choice captured</span>
+            <p>Your answer has been saved. Continue when you are ready for the next decision.</p>
           </div>
         ) : null}
       </article>
@@ -876,7 +908,7 @@ function MultiQuizActivity({ category, stage, stageState, itemIndex, setItemInde
     showHintPopup({
       category,
       title: 'Selection updated',
-      text: question.hint,
+      text: 'Your selection has been recorded. The stage scoreboard will assess the complete set.',
       icon: 'info',
     });
   };
@@ -886,6 +918,7 @@ function MultiQuizActivity({ category, stage, stageState, itemIndex, setItemInde
       <ActivityTopbar itemIndex={itemIndex} totalItems={stage.questions.length} onBack={onBack} />
       <article key={question.id} className="question-card question-enter">
         <StageHeader category={category} stage={stage} />
+        <InstructionPanel stage={stage} />
         <div className="scenario-strip">
           <span>{question.context}</span>
           <p>Select every option that applies. Some options are traps.</p>
@@ -910,8 +943,8 @@ function MultiQuizActivity({ category, stage, stageState, itemIndex, setItemInde
         </div>
         {selectedIds.length ? (
           <div className="feedback-card feedback-enter">
-            <span>Reflection note</span>
-            <p>{question.hint}</p>
+            <span>Selection captured</span>
+            <p>Your reflection choices have been saved. You can continue or revise before scoring.</p>
           </div>
         ) : null}
       </article>
@@ -1037,7 +1070,7 @@ function StageAnswerReview({ stage, stageState }) {
                 <strong>{risk.title}</strong>
                 <p>
                   Your score: {placement ? `${selectedScore} (P${placement.probability} x I${placement.impact})` : 'Not placed'}.
-                  Expected score: {risk.riskScore} (P{risk.probability} x I{risk.impact}).
+                  Review the signal, probability, and impact scale before retrying the placement.
                 </p>
               </div>
               <em>+{grade.score}</em>
@@ -1060,7 +1093,7 @@ function StageAnswerReview({ stage, stageState }) {
               <span>{grade.label}</span>
               <div>
                 <strong>{risk.title}</strong>
-                <p>Your response: {selected || 'None'}. Best response: {risk.response}.</p>
+                <p>Your response: {selected || 'None'}. Review the risk signal and strategy definitions before retrying.</p>
               </div>
               <em>+{grade.score}</em>
             </article>
@@ -1076,14 +1109,13 @@ function StageAnswerReview({ stage, stageState }) {
       <div className="review-list">
         {stage.questions.map((question) => {
           const selected = question.options.find((option) => option.id === answers[question.id]);
-          const correctOption = question.options.find((option) => option.score > 0);
           const correct = Boolean(selected?.score);
           return (
             <article key={question.id} className={`review-card ${correct ? 'correct' : 'almost'}`}>
-              <span>{correct ? 'Correct' : 'Almost there'}</span>
+              <span>{correct ? 'Scored' : 'Review'}</span>
               <div>
                 <strong>{question.context}</strong>
-                <p>Your answer: {selected?.label || 'None'}. Correct answer: {correctOption?.label || 'Review stage data'}.</p>
+                <p>Your answer: {selected?.label || 'None'}. Use the scenario evidence to retry the decision if needed.</p>
               </div>
               <em>{correct ? '+10' : '0'}</em>
             </article>
@@ -1102,13 +1134,12 @@ function StageAnswerReview({ stage, stageState }) {
           const expectedIds = question.correctOptionIds || [];
           const correct = selectedIds.length === expectedIds.length && expectedIds.every((id) => selectedIds.includes(id));
           const selectedLabels = question.options.filter((option) => selectedIds.includes(option.id)).map((option) => option.label);
-          const expectedLabels = question.options.filter((option) => expectedIds.includes(option.id)).map((option) => option.label);
           return (
             <article key={question.id} className={`review-card ${correct ? 'correct' : 'almost'}`}>
-              <span>{correct ? 'Correct' : 'Almost there'}</span>
+              <span>{correct ? 'Scored' : 'Review'}</span>
               <div>
                 <strong>{question.context}</strong>
-                <p>Your answers: {selectedLabels.join('; ') || 'None'}. Correct answers: {expectedLabels.join('; ')}.</p>
+                <p>Your answers: {selectedLabels.join('; ') || 'None'}. Revisit the briefing evidence if you want to improve the score.</p>
               </div>
               <em>{correct ? '+10' : '0'}</em>
             </article>
@@ -1121,17 +1152,54 @@ function StageAnswerReview({ stage, stageState }) {
   return null;
 }
 
-function FinalScoreScreen({ category, playableStages, stageStates, finalScore, finalBand, onRetry, onHome }) {
+function FinalScoreScreen({ category, playableStages, stageStates, finalScore, finalBand, onRetry, onHome, onOtherGames }) {
+  const petals = Array.from({ length: 22 }, (_, index) => index);
+  const celebrationIcons = ['🎉', '🚀', '🎊', '🎁', '🎈'];
+
   return (
     <section className="results-screen page-enter">
-      <div className="result-hero">
-        <span className="category-icon large">{category.icon}</span>
-        <span className="eyebrow">Final scoreboard</span>
-        <h1>{finalBand.label}</h1>
-        <p>{finalBand.tagline}</p>
-        <div className="score-ring" style={{ '--score': `${finalScore.percentage}%` }}>
-          <strong>{finalScore.percentage}%</strong>
-          <span>{finalScore.score}/{finalScore.maxScore}</span>
+      <div className="result-hero final-celebration">
+        <div className="petal-field" aria-hidden="true">
+          {petals.map((petal) => (
+            <span key={petal} style={{ '--petal-index': petal }} />
+          ))}
+        </div>
+        <h1 className="final-title">
+          <span>Congratulations</span>
+          <span className="celebration-icons" aria-hidden="true">
+            {celebrationIcons.map((icon, index) => (
+              <i key={icon} style={{ '--icon-index': index }}>{icon}</i>
+            ))}
+          </span>
+        </h1>
+        <p className="final-message">You reached the end of the simulation and earned a badge for your risk judgement.</p>
+
+        <div className="result-actions final-actions">
+          <button className="secondary-action" type="button" onClick={onHome}>
+            <i className="bx bx-home-alt" aria-hidden="true" />
+            Homepage
+          </button>
+          <button className="secondary-action" type="button" onClick={onOtherGames}>
+            <i className="bx bx-grid-alt" aria-hidden="true" />
+            Play other games
+          </button>
+          <button className="primary-action" type="button" onClick={onRetry}>
+            <i className="bx bx-refresh" aria-hidden="true" />
+            Retry from beginning
+          </button>
+        </div>
+
+        <div className="earned-badge">
+          <span className="category-icon large">{category.icon}</span>
+          <div className="score-ring" style={{ '--score': `${finalScore.percentage}%` }}>
+            <strong>{finalScore.percentage}%</strong>
+            <span>{finalScore.score}/{finalScore.maxScore}</span>
+          </div>
+          <div>
+            <span className="eyebrow">Badge earned</span>
+            <strong>{finalBand.label}</strong>
+            <p>{finalBand.tagline}</p>
+          </div>
         </div>
       </div>
 
@@ -1152,18 +1220,20 @@ function FinalScoreScreen({ category, playableStages, stageStates, finalScore, f
         })}
       </div>
 
-      <div className="result-actions">
-        <button className="secondary-action" type="button" onClick={onHome}>
-          <i className="bx bx-home-alt" aria-hidden="true" />
-          Homepage
-        </button>
-        <button className="primary-action" type="button" onClick={onRetry}>
-          <i className="bx bx-refresh" aria-hidden="true" />
-          Retry from beginning
-        </button>
-      </div>
     </section>
   );
+}
+
+function getStrategyOrder(strategies, seed) {
+  return [...strategies].sort((left, right) => {
+    const leftHash = hashString(`${seed}-${left}`);
+    const rightHash = hashString(`${seed}-${right}`);
+    return leftHash - rightHash;
+  });
+}
+
+function hashString(value) {
+  return Array.from(value).reduce((hash, character) => ((hash << 5) - hash + character.charCodeAt(0)) | 0, 0);
 }
 
 function ActivityTopbar({ itemIndex, totalItems, onBack }) {
