@@ -447,6 +447,21 @@ a {
   font-weight: 900;
 }
 
+.home-credit {
+  padding: 28px 0 0;
+  color: #6b7280;
+  font-size: 0.92rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.home-credit a {
+  color: #171827;
+  font-weight: 950;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
 .briefing-screen,
 .simulation-screen {
   display: grid;
@@ -1178,11 +1193,21 @@ a {
   display: grid;
   justify-items: center;
   gap: 10px;
+  width: 100%;
+  max-width: 100%;
   margin: 0;
   color: #171827;
   font-size: clamp(3.8rem, 10vw, 8.4rem);
   line-height: 0.92;
+  letter-spacing: 0;
   text-transform: uppercase;
+}
+
+.final-title > span:first-child {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .celebration-icons {
@@ -1230,6 +1255,8 @@ a {
 .earned-badge > div:last-child {
   display: grid;
   gap: 8px;
+  justify-items: center;
+  text-align: center;
 }
 
 .earned-badge > div:last-child > strong {
@@ -1800,13 +1827,13 @@ a {
   .final-celebration {
     gap: 14px;
     min-height: auto;
-    padding: 22px 14px;
+    padding: 22px 10px;
   }
 
   .final-title {
     width: 100%;
     max-width: 100%;
-    font-size: clamp(1.9rem, 9vw, 3.2rem);
+    font-size: clamp(1.35rem, 7.4vw, 2.35rem);
     line-height: 1;
     text-align: center;
   }
@@ -1823,9 +1850,16 @@ a {
   }
 
   .final-actions {
-    display: grid;
-    width: 100%;
-    grid-template-columns: 1fr;
+    display: flex;
+    width: auto;
+    justify-content: center;
+  }
+
+  .final-actions .primary-action,
+  .final-actions .secondary-action {
+    width: auto;
+    flex: 0 0 auto;
+    padding-inline: 16px;
   }
 
   .earned-badge {

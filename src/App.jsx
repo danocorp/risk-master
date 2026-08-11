@@ -81,6 +81,7 @@ function App() {
   const finalBand = getFinalBand(finalScore.percentage);
   const briefing = stage?.type === 'briefing' ? stage : stage?.briefing;
   const isVideoBriefing = state.screen === 'briefing' && Boolean(briefing?.videoSrc);
+  const canPlayMusic = state.screen !== 'home' && !isVideoBriefing;
   const musicSrc = assetUrl(MUSIC_TRACKS[state.stageIndex % MUSIC_TRACKS.length]);
 
   useEffect(() => {
@@ -88,7 +89,8 @@ function App() {
     if (!music) return;
 
     music.volume = musicVolume;
-    if (isVideoBriefing || state.screen === 'home') {
+    music.muted = musicVolume === 0;
+    if (!canPlayMusic) {
       music.pause();
       return;
     }
@@ -96,7 +98,22 @@ function App() {
     music.play().catch(() => {
       // Browsers may wait for a user gesture before allowing background audio.
     });
-  }, [isVideoBriefing, musicSrc, musicVolume, state.screen]);
+  }, [canPlayMusic, musicSrc, musicVolume]);
+
+  const handleMusicVolumeChange = (event) => {
+    const nextVolume = Number(event.target.value) / 100;
+    const music = musicRef.current;
+
+    setMusicVolume(nextVolume);
+
+    if (music) {
+      music.volume = nextVolume;
+      music.muted = nextVolume === 0;
+      if (canPlayMusic && nextVolume > 0) {
+        music.play().catch(() => {});
+      }
+    }
+  };
 
   const persist = (nextState) => {
     setState(nextState);
@@ -245,7 +262,8 @@ function App() {
               min="0"
               max="100"
               value={Math.round(musicVolume * 100)}
-              onChange={(event) => setMusicVolume(Number(event.target.value) / 100)}
+              onInput={handleMusicVolumeChange}
+              onChange={handleMusicVolumeChange}
               aria-label="Background music volume"
             />
             <span>{Math.round(musicVolume * 100)}%</span>
@@ -379,6 +397,10 @@ function HomeScreen({ selectedCategoryId, onSelectCategory }) {
           ))}
         </div>
       </section>
+
+      <footer className="home-credit">
+        Developed by <a href="https://danozone.com" target="_blank" rel="noreferrer">Danozone</a>
+      </footer>
     </section>
   );
 }
@@ -1165,14 +1187,14 @@ function FinalScoreScreen({ category, playableStages, stageStates, finalScore, f
           ))}
         </div>
         <h1 className="final-title">
-          <span>Congratulations</span>
+          <span>Congrats</span>
           <span className="celebration-icons" aria-hidden="true">
             {celebrationIcons.map((icon, index) => (
               <i key={icon} style={{ '--icon-index': index }}>{icon}</i>
             ))}
           </span>
         </h1>
-        <p className="final-message">You reached the end of the simulation and earned a badge for your risk judgement.</p>
+        <p className="final-message">You've earned a badge</p>
 
         <div className="result-actions final-actions">
           <button className="secondary-action" type="button" onClick={onHome}>
