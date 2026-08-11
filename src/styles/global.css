@@ -1796,4 +1796,50 @@ a {
     margin-right: -12px;
     margin-left: -12px;
   }
+
+  .final-celebration {
+    gap: 14px;
+    min-height: auto;
+    padding: 22px 14px;
+  }
+
+  .final-title {
+    width: 100%;
+    max-width: 100%;
+    font-size: clamp(1.9rem, 9vw, 3.2rem);
+    line-height: 1;
+    text-align: center;
+  }
+
+  .celebration-icons {
+    gap: 6px;
+    font-size: clamp(1.3rem, 7vw, 2rem);
+  }
+
+  .final-message {
+    max-width: 100%;
+    font-size: 1rem;
+    line-height: 1.35;
+  }
+
+  .final-actions {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 1fr;
+  }
+
+  .earned-badge {
+    width: 100%;
+    gap: 14px;
+    padding: 16px 12px;
+  }
+
+  .earned-badge .score-ring {
+    width: 132px;
+    height: 132px;
+  }
+
+  .earned-badge > div:last-child > strong {
+    font-size: clamp(1.45rem, 8vw, 2.3rem);
+  }
 }
