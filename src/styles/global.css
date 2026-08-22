@@ -1166,6 +1166,14 @@ a {
   color: #5b6272;
 }
 
+.review-card .correct-answer {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(26, 29, 46, 0.08);
+  color: #171827;
+  font-weight: 800;
+}
+
 .review-card em {
   color: var(--category-accent);
   font-style: normal;
@@ -1208,6 +1216,10 @@ a {
   max-width: 100%;
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+.congratulations-text {
+  font-size: clamp(2.6rem, 8vw, 7.4rem);
 }
 
 .celebration-icons {
@@ -1836,6 +1848,10 @@ a {
     font-size: clamp(1.35rem, 7.4vw, 2.35rem);
     line-height: 1;
     text-align: center;
+  }
+
+  .congratulations-text {
+    font-size: clamp(1.7rem, 11vw, 3rem);
   }
 
   .celebration-icons {

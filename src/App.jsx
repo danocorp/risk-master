@@ -10,13 +10,16 @@ import {
   getPlayableStages,
   getRiskHeat,
   gradeAnalysisPlacement,
+  gradeMultiQuizAnswer,
+  gradeQuizOption,
   gradeRiskResponse,
   impactScale,
   probabilityScale,
 } from './data/riskSimulator.js';
 import { assetUrl } from './data/cloudinaryAssets.js';
 
-const STORAGE_KEY = 'riskmaster-staged-simulator-state-v3';
+const STORAGE_KEY = 'riskmaster-staged-simulator-state-v4';
+const FEATURED_CATEGORY_ID = 'automobile';
 const DEFAULT_STATE = {
   selectedCategoryId: 'automobile',
   screen: 'home',
@@ -331,18 +334,18 @@ function App() {
   );
 }
 
-function HomeScreen({ selectedCategoryId, onSelectCategory }) {
+function HomeScreen({ onSelectCategory }) {
   return (
     <section className="home-screen page-enter">
       <div className="hero-panel">
         <div className="hero-copy">
           <span className="eyebrow">Full-stage risk simulator</span>
-          <h1>Brief. Decide. Score. Level up.</h1>
+          <h1>Risk Management Simulations</h1>
           <p>
             A colorful staged training app for risk identification, analysis, response, monitoring, opportunity management, and lessons learned.
           </p>
           <div className="hero-actions">
-            <button className="primary-action" type="button" onClick={() => onSelectCategory(selectedCategoryId)}>
+            <button className="primary-action" type="button" onClick={() => onSelectCategory(FEATURED_CATEGORY_ID)}>
               <i className="bx bx-play-circle" aria-hidden="true" />
               Start featured scenario
             </button>
@@ -537,8 +540,8 @@ function InstructionPanel({ stage }) {
     briefing: 'Review the written brief as well as the video, then continue to the next stage when the project context is clear.',
     identify: 'Read each signal, decide whether it is a material project risk, then tap the option that should go into the risk register.',
     analysis: 'Tap one heatmap cell for each risk. Probability is rated 1-5 from very low to very high. Impact is rated 1-5 from negligible to catastrophic. The risk score is Probability x Impact.',
-    response: 'Read the specific risk signal, compare the five response strategies, then tap the strategy that best fits that risk exposure.',
-    quiz: 'Read the live scenario, choose the strongest next action, then continue after your decision is recorded.',
+    response: 'Read the specific risk signal, compare the five response strategies, then tap the response you would use for that exposure.',
+    quiz: 'Read the live scenario, choose the next action, then continue after your decision is recorded.',
     multiQuiz: 'Select every option that applies to the reflection prompt, then continue once your selections are recorded.',
   };
   const instruction = stage.instructions || copy[stage.type] || copy.briefing;
@@ -573,7 +576,7 @@ function IdentificationActivity({ category, stage, stageState, itemIndex, setIte
     showHintPopup({
       category,
       title: value ? 'Risk flagged' : 'Signal parked',
-      text: 'Your register decision is saved. The scoreboard will reveal whether this was a true risk or a decoy.',
+      text: 'Your register decision is saved. The scoreboard will reveal the assessment after the stage.',
       icon: 'info',
     });
   };
@@ -585,7 +588,7 @@ function IdentificationActivity({ category, stage, stageState, itemIndex, setIte
         <StageHeader category={category} stage={stage} />
         <InstructionPanel stage={stage} />
         <div className="scenario-strip signal-alert">
-          <span>{item.scenarioTag ? `${item.scenarioTag} - ${item.scenario || 'Risk signal'}` : item.scenario || 'Risk signal'}</span>
+          <span>{getPreScoreSignalLabel(item)}</span>
           <p>{item.signal}</p>
         </div>
         <strong className="risk-title">{item.title}</strong>
@@ -793,7 +796,7 @@ function ResponseActivity({ category, stage, stageState, itemIndex, setItemIndex
           <p>{risk.signal}</p>
         </div>
         <strong className="risk-title">{risk.title}</strong>
-        <h2>Which response strategy best fits this risk?</h2>
+        <h2>Which response strategy would you use for this risk?</h2>
         <div className="strategy-grid">
           {getStrategyOrder(stage.strategies, risk.id).map((strategy) => (
             <button
@@ -803,7 +806,7 @@ function ResponseActivity({ category, stage, stageState, itemIndex, setItemIndex
               onClick={() => choose(strategy)}
             >
               <strong>{strategy}</strong>
-              <span>{getStrategyCopy(strategy)}</span>
+              <span>{getStrategyCopy(strategy, risk)}</span>
             </button>
           ))}
         </div>
@@ -866,7 +869,7 @@ function QuizActivity({ category, stage, stageState, itemIndex, setItemIndex, up
           <span>Scenario</span>
           <p>{question.context}</p>
         </div>
-        <h2>{question.prompt}</h2>
+        <h2>{neutralizePreScorePrompt(question.prompt)}</h2>
         <div className="option-list">
           {question.options.map((option, index) => (
             <button
@@ -945,7 +948,7 @@ function MultiQuizActivity({ category, stage, stageState, itemIndex, setItemInde
           <span>{question.context}</span>
           <p>Select every option that applies. Some options are traps.</p>
         </div>
-        <h2>{question.prompt}</h2>
+        <h2>{neutralizePreScorePrompt(question.prompt)}</h2>
         <div className="option-list">
           {question.options.map((option, index) => {
             const selected = selectedIds.includes(option.id);
@@ -1085,6 +1088,7 @@ function StageAnswerReview({ stage, stageState }) {
           const placement = placements[risk.id];
           const selectedScore = placement ? Number(placement.probability) * Number(placement.impact) : 0;
           const grade = gradeAnalysisPlacement(risk, placement);
+          const needsCorrection = grade.score < 10;
           return (
             <article key={risk.id} className={`review-card ${grade.className}`}>
               <span>{grade.label}</span>
@@ -1094,6 +1098,11 @@ function StageAnswerReview({ stage, stageState }) {
                   Your score: {placement ? `${selectedScore} (P${placement.probability} x I${placement.impact})` : 'Not placed'}.
                   Review the signal, probability, and impact scale before retrying the placement.
                 </p>
+                {needsCorrection ? (
+                  <p className="correct-answer">
+                    Correct answer: P{risk.probability} x I{risk.impact} = {risk.riskScore}. This fits the evidence: {risk.signal}
+                  </p>
+                ) : null}
               </div>
               <em>+{grade.score}</em>
             </article>
@@ -1110,12 +1119,18 @@ function StageAnswerReview({ stage, stageState }) {
         {stage.risks.map((risk) => {
           const selected = responses[risk.id];
           const grade = gradeRiskResponse(risk, selected);
+          const selectedFeedback = selected ? risk.feedback?.[selected] : '';
+          const correctFeedback = risk.feedback?.[risk.response] || '';
+          const needsCorrection = selected !== risk.response;
           return (
             <article key={risk.id} className={`review-card ${grade.className}`}>
               <span>{grade.label}</span>
               <div>
                 <strong>{risk.title}</strong>
-                <p>Your response: {selected || 'None'}. Review the risk signal and strategy definitions before retrying.</p>
+                <p>Your response: {selected || 'None'}. {selectedFeedback || 'Review the risk signal and strategy definitions before retrying.'}</p>
+                {needsCorrection ? (
+                  <p className="correct-answer">Correct answer: {risk.response}. {correctFeedback}</p>
+                ) : null}
               </div>
               <em>+{grade.score}</em>
             </article>
@@ -1131,15 +1146,22 @@ function StageAnswerReview({ stage, stageState }) {
       <div className="review-list">
         {stage.questions.map((question) => {
           const selected = question.options.find((option) => option.id === answers[question.id]);
-          const correct = Boolean(selected?.score);
+          const grade = gradeQuizOption(question, selected, stage);
+          const correctOption = question.options.reduce((best, option) => (
+            Number(option.score || 0) > Number(best?.score || 0) ? option : best
+          ), question.options[0]);
+          const needsCorrection = selected?.id !== correctOption?.id;
           return (
-            <article key={question.id} className={`review-card ${correct ? 'correct' : 'almost'}`}>
-              <span>{correct ? 'Scored' : 'Review'}</span>
+            <article key={question.id} className={`review-card ${grade.className}`}>
+              <span>{grade.label}</span>
               <div>
                 <strong>{question.context}</strong>
-                <p>Your answer: {selected?.label || 'None'}. Use the scenario evidence to retry the decision if needed.</p>
+                <p>Your answer: {selected?.label || 'None'}. {selected?.feedback || 'Use the scenario evidence to retry the decision if needed.'}</p>
+                {needsCorrection ? (
+                  <p className="correct-answer">Correct answer: {correctOption?.label}. {correctOption?.feedback}</p>
+                ) : null}
               </div>
-              <em>{correct ? '+10' : '0'}</em>
+              <em>+{grade.score}</em>
             </article>
           );
         })}
@@ -1153,17 +1175,24 @@ function StageAnswerReview({ stage, stageState }) {
       <div className="review-list">
         {stage.questions.map((question) => {
           const selectedIds = answers[question.id] || [];
+          const grade = gradeMultiQuizAnswer(question, selectedIds);
           const expectedIds = question.correctOptionIds || [];
-          const correct = selectedIds.length === expectedIds.length && expectedIds.every((id) => selectedIds.includes(id));
           const selectedLabels = question.options.filter((option) => selectedIds.includes(option.id)).map((option) => option.label);
+          const correctLabels = question.options.filter((option) => expectedIds.includes(option.id)).map((option) => option.label);
+          const correct = grade.score === 10;
           return (
-            <article key={question.id} className={`review-card ${correct ? 'correct' : 'almost'}`}>
-              <span>{correct ? 'Scored' : 'Review'}</span>
+            <article key={question.id} className={`review-card ${grade.className}`}>
+              <span>{grade.label}</span>
               <div>
                 <strong>{question.context}</strong>
                 <p>Your answers: {selectedLabels.join('; ') || 'None'}. Revisit the briefing evidence if you want to improve the score.</p>
+                {!correct ? (
+                  <p className="correct-answer">
+                    Correct answers: {correctLabels.join('; ')}. {question.hint || 'These options best match the stage briefing evidence.'}
+                  </p>
+                ) : null}
               </div>
-              <em>{correct ? '+10' : '0'}</em>
+              <em>+{grade.score}</em>
             </article>
           );
         })}
@@ -1187,7 +1216,7 @@ function FinalScoreScreen({ category, playableStages, stageStates, finalScore, f
           ))}
         </div>
         <h1 className="final-title">
-          <span>Congrats</span>
+          <span className="congratulations-text">Congratulations</span>
           <span className="celebration-icons" aria-hidden="true">
             {celebrationIcons.map((icon, index) => (
               <i key={icon} style={{ '--icon-index': index }}>{icon}</i>
@@ -1284,7 +1313,25 @@ function StageHeader({ category, stage }) {
   );
 }
 
-function getStrategyCopy(strategy) {
+function getPreScoreSignalLabel(item) {
+  const scenario = item.scenario || 'Risk signal';
+  const tag = item.scenarioTag;
+
+  if (!tag || tag === 'General') return scenario;
+
+  const duplicateSuffix = ` - ${tag}`;
+  const cleanScenario = scenario.endsWith(duplicateSuffix)
+    ? scenario.slice(0, -duplicateSuffix.length)
+    : scenario;
+
+  return `${tag} - ${cleanScenario}`;
+}
+
+function getStrategyCopy(strategy, risk) {
+  const scenarioCopy = risk?.optionDescriptions?.[strategy] || risk?.feedback?.[strategy];
+
+  if (scenarioCopy) return neutralizePreScoreCopy(scenarioCopy);
+
   const copy = {
     Avoid: 'Stop or change the work so the risk no longer applies.',
     Mitigate: 'Reduce likelihood, impact, or both with stronger controls.',
@@ -1293,6 +1340,40 @@ function getStrategyCopy(strategy) {
     Escalate: 'Raise the decision because it exceeds team authority or tolerance.',
   };
   return copy[strategy] || '';
+}
+
+function neutralizePreScorePrompt(prompt = '') {
+  return prompt
+    .replace(/\bWhat is the best control action\?/gi, 'What control action would you take?')
+    .replace(/\bWhat is the best move\?/gi, 'What move would you make?')
+    .replace(/\bWhat is the best monitoring action\?/gi, 'What monitoring action would you take?')
+    .replace(/\bWhat is the best register update\?/gi, 'What register update would you make?')
+    .replace(/\bWhat is the best register move\?/gi, 'What register move would you make?')
+    .replace(/\bWhich opportunity response is strongest\?/gi, 'Which opportunity response would you use?')
+    .replace(/\bWhich is the correct lesson\?/gi, 'Which lesson would you record?')
+    .replace(/\bWhich items best correspond\b/gi, 'Which items correspond');
+}
+
+function neutralizePreScoreCopy(copy = '') {
+  return copy
+    .replace(/\bBest response\b/gi, 'Response')
+    .replace(/\bBest\b/gi, 'Response note')
+    .replace(/\bCorrect:?\s*/gi, '')
+    .replace(/\bWrong:?\s*/gi, '')
+    .replace(/\bunrealistic and prohibitively expensive\b/gi, 'has major feasibility and cost implications')
+    .replace(/\bprohibitively expensive\b/gi, 'has major cost implications')
+    .replace(/\bunrealistic\b/gi, 'has feasibility constraints')
+    .replace(/\bnot feasible\b/gi, 'has feasibility constraints')
+    .replace(/\bImpossible\b/g, 'Has major feasibility constraints')
+    .replace(/\bimpossible\b/g, 'has major feasibility constraints')
+    .replace(/\birresponsible\b/gi, 'carries serious governance exposure')
+    .replace(/\bethically unacceptable\b/gi, 'creates serious ethical exposure')
+    .replace(/\billegal and unacceptable\b/gi, 'creates legal and governance exposure')
+    .replace(/\billegal\b/gi, 'creates legal exposure')
+    .replace(/\bunacceptable\b/gi, 'creates serious exposure')
+    .replace(/\btoo risky\b/gi, 'carries high residual exposure')
+    .replace(/\bdangerous\b/gi, 'creates major continuity exposure')
+    .replace(/\bstrongest\b/gi, 'notable');
 }
 
 export default App;
