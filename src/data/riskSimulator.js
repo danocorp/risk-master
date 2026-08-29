@@ -147,7 +147,7 @@ const analysisRisks = [
   {
     id: 'vendor-integration',
     title: 'Vendor mismatch or integration',
-    signal: 'The supplier API does not map cleanly to the factory execution system.',
+    signal: 'The supplier application programming interface does not map cleanly to the factory execution system.',
     probability: 3,
     impact: 3,
   },
@@ -191,11 +191,11 @@ const analysisRisks = [
 const responseRisks = [
   {
     id: 'iot-cyberattack-response',
-    title: 'Cyberattack on IoT devices',
-    signal: 'Production IoT devices are exposed to suspicious traffic and repeated login attempts.',
+    title: 'Cyberattack on Internet of Things devices',
+    signal: 'Production Internet of Things devices are exposed to suspicious traffic and repeated login attempts.',
     response: 'Mitigate',
     feedback: {
-      Avoid: 'Replacing IoT devices entirely is unrealistic and prohibitively expensive for the AI-enabled assembly plant.',
+      Avoid: 'Replacing Internet of Things devices entirely has major feasibility and cost implications for the artificial intelligence-enabled assembly plant.',
       Mitigate: 'Network segmentation, device authentication, continuous monitoring, and firmware patching reduce attack likelihood while production continues.',
       Transfer: 'Cyber insurance can cover financial loss, but it does not prevent corrupted safety data or production shutdown.',
       Accept: 'Accepting this risk is irresponsible because breach likelihood and operational impact are high.',
@@ -208,7 +208,7 @@ const responseRisks = [
     signal: 'A heavy robotic arm creates severe injury potential around maintenance access points.',
     response: 'Mitigate',
     feedback: {
-      Avoid: 'Halting robotics would stop production and undermine the core AI/robotic assembly goals.',
+      Avoid: 'Halting robotics would stop production and undermine the core artificial intelligence and robotic assembly goals.',
       Mitigate: 'Advanced safety sensors, geofencing, and mandatory operator training reduce worker injury and vehicle damage exposure.',
       Transfer: 'Insurance covers costs after an incident, but it cannot protect workers from harm.',
       Accept: 'Accepting severe robotic injury exposure is ethically unacceptable.',
@@ -218,10 +218,10 @@ const responseRisks = [
   {
     id: 'cloud-outage-response',
     title: 'Cloud outage',
-    signal: 'The AI platform depends on one cloud region for production scheduling and model services.',
+    signal: 'The artificial intelligence platform depends on one cloud region for production scheduling and model services.',
     response: 'Transfer',
     feedback: {
-      Avoid: 'Avoiding cloud platforms is not feasible because predictive analytics and AI scheduling depend on them.',
+      Avoid: 'Avoiding cloud platforms is not feasible because predictive analytics and artificial intelligence scheduling depend on them.',
       Mitigate: 'Backup servers or local failover reduce disruption, but some cloud-provider exposure remains.',
       Transfer: 'A multi-cloud or failover contract shifts continuity responsibility if one provider fails.',
       Accept: 'Accepting single-cloud outage risk is too risky for production.',
@@ -231,7 +231,7 @@ const responseRisks = [
   {
     id: 'regulatory-non-compliance-response',
     title: 'Regulatory non-compliance',
-    signal: 'The AI safety process may not satisfy certification requirements.',
+    signal: 'The artificial intelligence safety process may not satisfy certification requirements.',
     response: 'Avoid',
     feedback: {
       Avoid: 'Redesigning processes and systems to meet safety, data, and automation rules from the outset prevents illegal exposure before launch.',
@@ -243,12 +243,12 @@ const responseRisks = [
   },
   {
     id: 'ai-bias-response',
-    title: 'AI bias in quality control',
+    title: 'Artificial intelligence bias in quality control',
     signal: 'The quality model under-detects defects from one supplier pattern.',
     response: 'Mitigate',
     feedback: {
-      Avoid: 'Removing AI undermines the efficiency case for the automated assembly programme.',
-      Mitigate: 'Bias testing, model retraining, and human-in-the-loop validation reduce defective vehicles reaching customers.',
+      Avoid: 'Removing artificial intelligence undermines the efficiency case for the automated assembly programme.',
+      Mitigate: 'Bias testing, model retraining, and human-in-the-loop validation reduce the chance that artificial intelligence quality-control errors allow defective vehicles to reach customers.',
       Transfer: 'Vendors may share responsibility, but Project Atlas still owns product quality and reputation.',
       Accept: 'Accepting bias can harm customers and damage the brand.',
       Escalate: 'Escalation fits if the bias stems from industry-wide data standards.',
@@ -276,30 +276,30 @@ const responseRisks = [
       Avoid: 'Redesigning data flows to minimise personal data and remove unnecessary collection eliminates avoidable privacy exposure.',
       Mitigate: 'Encryption, access controls, and anomaly monitoring reduce breach likelihood, but excess collection remains.',
       Transfer: 'Insurance covers some costs, but not legal consequences or trust damage.',
-      Accept: 'Accepting this risk can be illegal under GDPR and similar rules.',
+      Accept: 'Accepting this risk can be illegal under the General Data Protection Regulation and similar rules.',
       Escalate: 'Escalation is required if breaches affect multiple business units.',
     },
   },
   {
     id: 'worker-resistance-response',
     title: 'Worker resistance to automation',
-    signal: 'Operators fear job losses and begin resisting the AI implementation.',
+    signal: 'Operators fear job losses and begin resisting the artificial intelligence implementation.',
     response: 'Mitigate',
     feedback: {
       Avoid: 'Cancelling automation would undermine Project Atlas viability.',
       Mitigate: 'Training, transparent communication, and change-management support reduce fear of job loss and productivity disruption.',
       Transfer: 'Automation resistance cannot be outsourced or insured away.',
       Accept: 'Accepting resistance can cause morale decline and slower adoption.',
-      Escalate: 'Escalation fits if resistance becomes a formal HR or union dispute.',
+      Escalate: 'Escalation fits if resistance becomes a formal human resources or union dispute.',
     },
   },
   {
     id: 'vendor-bankruptcy-response',
     title: 'Vendor bankruptcy',
-    signal: 'The AI software supplier shows signs of financial distress.',
+    signal: 'The artificial intelligence software supplier shows signs of financial distress.',
     response: 'Transfer',
     feedback: {
-      Avoid: 'Avoiding vendors is not feasible because specialist robotics and AI suppliers are essential.',
+      Avoid: 'Avoiding vendors is not feasible because specialist robotics and artificial intelligence suppliers are essential.',
       Mitigate: 'Vendor diversification reduces single-supplier dependency, but may not protect existing commitments.',
       Transfer: 'Performance bonds, warranties, and financial guarantees shift part of vendor bankruptcy exposure.',
       Accept: 'Accepting vendor collapse exposure is dangerous because support and replacement parts could disappear suddenly.',
@@ -339,9 +339,9 @@ const optionStages = {
         prompt: 'An emergency alert reports a possible AI-controlled robotic assembly fault in Plant B. What should the project team do first?',
         context: 'Phase 1 - Immediate Response',
         options: [
-          { id: 'a', label: 'Evacuate Plant B immediately.', score: 10, feedback: 'Correct: this prioritises human safety in a live emergency, even though production stops.' },
-          { id: 'b', label: 'Keep non-involved areas running, isolate Plant B only.', score: 5, feedback: 'Acceptable but flagged: this needs strong justification, rapid containment, and close safety oversight.' },
-          { id: 'c', label: 'Do nothing until more information is confirmed.', score: 0, feedback: 'Wrong: delaying action is unacceptable when workers may be exposed to an emergency.' },
+          { id: 'a', label: 'Evacuate Plant B immediately.', score: 10, feedback: 'This protects life first, removes workers from a potentially unsafe robotic cell, gives emergency responders a clear area to control, and accepts production stoppage as the right trade-off during a live safety issue.' },
+          { id: 'b', label: 'Keep non-involved areas running, isolate Plant B only.', score: 5, feedback: 'Acceptable but weaker: partial isolation may be reasonable after the boundary is confirmed, but at first alert the team does not yet know whether the robotic fault, power isolation, or emergency access risk is contained.' },
+          { id: 'c', label: 'Do nothing until more information is confirmed.', score: 0, feedback: 'Needs review: delaying action leaves workers exposed while facts are still uncertain, which is a poor issue-management response when potential harm is immediate.' },
         ],
       },
     ],
@@ -387,19 +387,19 @@ const optionStages = {
           { id: 'a', label: 'Wait for written confirmation before acting.', score: 0, feedback: 'This saves time now but risks delay.' },
           { id: 'b', label: 'Start preparing compliance files immediately and log as risk.', score: 10, feedback: 'This is proactive and strengthens resilience.' },
           { id: 'c', label: 'Prioritise production, push prep to last 24 hours.', score: 0, feedback: 'This gives short-term production gain but a long-term penalty.' },
-          { id: 'd', label: 'Escalate to compliance officer but continue BAU.', score: 0, feedback: 'This delegates the concern but may still delay real readiness.' },
+          { id: 'd', label: 'Escalate to compliance officer but continue Business As Usual.', score: 0, feedback: 'This delegates the concern but may still delay real readiness.' },
         ],
       },
     ],
   },
   opportunity: {
     title: 'Opportunity Management',
-    label: 'Upside quiz',
+    label: 'Value quiz',
     briefing: {
       title: 'Opportunity Management Briefing',
-      label: 'Positive uncertainty',
+      label: 'Positive uncertainties',
       videoSrc: '',
-      summary: 'Some uncertainty can create value. Choose how to exploit, enhance, share, or accept upside without losing control.',
+      summary: 'Some uncertainties can create value. Choose how to exploit, enhance, share, or accept benefits without losing control.',
     },
     questions: [
       {
@@ -418,7 +418,7 @@ const optionStages = {
         prompt: 'A regulatory approval comes in three weeks earlier than expected. Which opportunity response would you use?',
         context: 'Schedule Windfall',
         options: [
-          { id: 'a', label: 'Enhance: Use the window for extra testing and QA.', score: 0, feedback: 'This improves quality, but spends some of the time advantage.' },
+          { id: 'a', label: 'Enhance: Use the window for extra testing and quality assurance.', score: 0, feedback: 'This improves quality, but spends some of the time advantage.' },
           { id: 'b', label: 'Share: Align with partners to launch collaboratively.', score: 0, feedback: 'This can improve reputation and collaboration, but control is shared.' },
           { id: 'c', label: 'Exploit: Accelerate production phase, getting product to market sooner.', score: 10, feedback: 'This improves time-to-market and revenue, with workforce stress to manage.' },
           { id: 'd', label: 'Accept: Stick to baseline schedule.', score: 0, feedback: 'This protects stability but misses the gain.' },
@@ -579,15 +579,6 @@ const petroNovaIdentificationRisks = [
     insight: 'Hot work near hydrocarbon lines is a major safety and environmental risk.',
   },
   {
-    id: 'petro-reputation-legal',
-    scenario: 'Site Walkthrough - PESTLE',
-    scenarioTag: 'PESTLE',
-    title: 'Reputational and legal risk',
-    signal: 'A drone hovers overhead. Cue: "Footage of unsafe practices may be shared online."',
-    isRisk: true,
-    insight: 'Public evidence of unsafe practice can trigger legal, regulatory, and reputation consequences.',
-  },
-  {
     id: 'petro-permit-delay',
     scenario: 'Site Walkthrough - PESTLE',
     scenarioTag: 'PESTLE',
@@ -595,15 +586,6 @@ const petroNovaIdentificationRisks = [
     signal: 'A colleague says: "Those protests are causing the permit office delays again."',
     isRisk: true,
     insight: 'External political and regulatory pressure can delay permits and work approvals.',
-  },
-  {
-    id: 'petro-fuel-volatility',
-    scenario: 'Site Walkthrough - PESTLE',
-    scenarioTag: 'PESTLE',
-    title: 'Market and economic volatility',
-    signal: 'A truck driver at the gate says: "Fuel prices keep changing every week."',
-    isRisk: true,
-    insight: 'Fuel price movement can affect logistics, budget, and contingency needs.',
   },
   {
     id: 'petro-old-equipment',
@@ -622,15 +604,6 @@ const petroNovaIdentificationRisks = [
     signal: 'A bright poster says: "New visitor safety artwork coming soon."',
     isRisk: false,
     insight: 'This may support communication, but it is not a material project risk signal.',
-  },
-  {
-    id: 'petro-football-chat',
-    scenario: 'Site Walkthrough - PESTLE',
-    scenarioTag: 'General',
-    title: 'Football chatter outside the fence',
-    signal: 'Two workers argue about last night\'s football score near the gate.',
-    isRisk: false,
-    insight: 'Background chatter is not a relevant risk source unless it affects work performance or safety.',
   },
   {
     id: 'petro-welding-slippage',
@@ -669,51 +642,6 @@ const petroNovaIdentificationRisks = [
     insight: 'Outdated drawings can create rework, safety, and construction quality risks.',
   },
   {
-    id: 'petro-steel-volatility',
-    scenario: 'Project Office - SWOT',
-    scenarioTag: 'SWOT',
-    title: 'Cost and material volatility',
-    signal: 'Spreadsheet margin note cue: "Steel price forecast: volatile."',
-    isRisk: true,
-    insight: 'Material price volatility can affect procurement strategy and contingency.',
-  },
-  {
-    id: 'petro-coffee-machine',
-    scenario: 'Project Office - SWOT',
-    scenarioTag: 'General',
-    title: 'Coffee machine queue',
-    signal: 'A team member complains that the coffee machine queue is too long after lunch.',
-    isRisk: false,
-    insight: 'This is a workplace annoyance, not a meaningful risk to refinery expansion delivery.',
-  },
-  {
-    id: 'petro-font-change',
-    scenario: 'Project Office - SWOT',
-    scenarioTag: 'General',
-    title: 'Slide font preference',
-    signal: 'The project assistant asks whether the board deck should use a larger font.',
-    isRisk: false,
-    insight: 'Presentation formatting is not a project risk unless it affects decision quality.',
-  },
-  {
-    id: 'petro-carbon-rules',
-    scenario: 'Strategy Meeting - VUCA',
-    scenarioTag: 'VUCA',
-    title: 'Regulatory uncertainty',
-    signal: 'Legislation slide cue: "Carbon compliance rules - TBD."',
-    isRisk: true,
-    insight: 'Unclear future regulation makes planning, design, and compliance harder.',
-  },
-  {
-    id: 'petro-oil-price-swings',
-    scenario: 'Strategy Meeting - VUCA',
-    scenarioTag: 'VUCA',
-    title: 'Financial volatility',
-    signal: 'Finance folder cue: "Cashflow sensitivity: oil price swings plus/minus 30%."',
-    isRisk: true,
-    insight: 'Large commodity-price swings can affect funding, contingency, and investment decisions.',
-  },
-  {
     id: 'petro-tie-in-accountability',
     scenario: 'Strategy Meeting - VUCA',
     scenarioTag: 'VUCA',
@@ -723,24 +651,6 @@ const petroNovaIdentificationRisks = [
     insight: 'Unclear safety ownership can cause gaps, conflict, and delayed decisions.',
   },
   {
-    id: 'petro-contractor-complexity',
-    scenario: 'Strategy Meeting - VUCA',
-    scenarioTag: 'VUCA',
-    title: 'Complexity and coordination hazards',
-    signal: 'Construction schedule cue: "Multiple contractors, overlapping shifts."',
-    isRisk: true,
-    insight: 'Many interdependent contractors and shifts increase coordination and safety complexity.',
-  },
-  {
-    id: 'petro-import-disruption',
-    scenario: 'Strategy Meeting - VUCA',
-    scenarioTag: 'VUCA',
-    title: 'Political instability causing supply chain risk',
-    signal: 'TV news cue: "Trade talks collapse - imports disrupted."',
-    isRisk: true,
-    insight: 'Political disruption can affect imported modules and critical supplies.',
-  },
-  {
     id: 'petro-catering-choice',
     scenario: 'Strategy Meeting - VUCA',
     scenarioTag: 'General',
@@ -748,15 +658,6 @@ const petroNovaIdentificationRisks = [
     signal: 'An executive asks whether sandwiches or pastries should be served next meeting.',
     isRisk: false,
     insight: 'Catering preference does not affect the risk profile of the refinery expansion.',
-  },
-  {
-    id: 'petro-wall-art',
-    scenario: 'Strategy Meeting - VUCA',
-    scenarioTag: 'General',
-    title: 'Boardroom wall art',
-    signal: 'A framed photograph in the boardroom is slightly crooked.',
-    isRisk: false,
-    insight: 'This is a visual distraction, not a source of project uncertainty.',
   },
 ];
 
@@ -785,7 +686,7 @@ const petroNovaAnalysisRisks = [
   {
     id: 'petro-electrical-fire',
     title: 'Electrical fire during tie-in',
-    signal: 'New HV systems are being integrated while live. Evidence: fire risk elevated but redundancy systems installed.',
+    signal: 'New high-voltage systems are being integrated while live. Evidence: fire risk elevated but redundancy systems installed.',
     probability: 2,
     impact: 4,
   },
@@ -844,7 +745,7 @@ const petroNovaResponseRisks = [
       Mitigate: 'Gas detection, hot-work controls, isolation, emergency shutdown, fire suppression, and atmospheric monitoring reduce risk but still work around the hazard.',
       Transfer: 'Specialist contractors and insurance shift some responsibility, but they do not eliminate the catastrophic exposure.',
       Accept: 'Proceeding with residual explosion risk is only tolerable within approved limits and is weak for a catastrophic hazard.',
-      Escalate: 'HSE leadership should authorise any unacceptable residual hydrocarbon-release risk.',
+      Escalate: 'Health, safety, and environment leadership should authorise any unacceptable residual hydrocarbon-release risk.',
     },
   },
   {
@@ -854,10 +755,10 @@ const petroNovaResponseRisks = [
     response: 'Mitigate',
     feedback: {
       Avoid: 'Substitution or removing unnecessary acid-cleaning helps where feasible, but chemical use is inherent to refinery work.',
-      Mitigate: 'Procedures, COSHH assessments, PPE, ventilation, gas monitoring, trained operators, controlled storage, and decontamination reduce exposure.',
+      Mitigate: 'Procedures, Control of Substances Hazardous to Health assessments, personal protective equipment, ventilation, gas monitoring, trained operators, controlled storage, and decontamination reduce exposure.',
       Transfer: 'A specialist chemical-handling contractor can help, but the refinery still needs competent oversight.',
       Accept: 'Routine controlled handling may be accepted only when residual exposure is demonstrably low.',
-      Escalate: 'Senior HSE escalation fits where substances or exposure levels exceed project tolerance.',
+      Escalate: 'Senior health, safety, and environment escalation fits where substances or exposure levels exceed project tolerance.',
     },
   },
   {
@@ -881,9 +782,9 @@ const petroNovaResponseRisks = [
     feedback: {
       Avoid: 'A controlled shutdown and redesigned commissioning sequence would avoid simultaneous live-system integration where possible.',
       Mitigate: 'Lockout, insulation testing, protection-system testing, fire detection, competent electricians, and staged energisation reduce the hazard.',
-      Transfer: 'A specialist HV contractor can take defined commissioning responsibilities, but the project still faces the live-interface risk.',
+      Transfer: 'A specialist high-voltage contractor can take defined commissioning responsibilities, but the project still faces the live-interface risk.',
       Accept: 'Limited residual electrical risk is acceptable only after all mandatory controls and tests are satisfied.',
-      Escalate: 'The live high-voltage interface can exceed project authority, so senior engineering and HSE governance should decide before work proceeds.',
+      Escalate: 'The live high-voltage interface can exceed project authority, so senior engineering and health, safety, and environment governance should decide before work proceeds.',
     },
   },
   {
@@ -958,7 +859,7 @@ const petroNovaResponseRisks = [
     response: 'Mitigate',
     feedback: {
       Avoid: 'Removing unnecessary access points and restricting sensitive areas reduces exposure, but intrusion attempts cannot be eliminated.',
-      Mitigate: 'Controlled access, passes, CCTV, perimeter protection, visitor management, lighting, patrols, and incident reporting create proportionate layered security.',
+      Mitigate: 'Controlled access, passes, closed-circuit television, perimeter protection, visitor management, lighting, patrols, and incident reporting create proportionate layered security.',
       Transfer: 'A specialist security provider can take defined protection duties, but the project still faces sabotage consequences.',
       Accept: 'Only low-level incidents with no material project threat should be accepted.',
       Escalate: 'Credible threats or suspected sabotage should be escalated to senior management and relevant external authorities.',
@@ -1023,7 +924,7 @@ const petroNovaStages = {
       },
       {
         id: 'petro-monitor-5',
-        prompt: 'Night CCTV shows an unlocked gate, unknown restricted-zone entry, logbook mismatch, and a suspicious activity email. What move would you make?',
+        prompt: 'Night closed-circuit television shows an unlocked gate, unknown restricted-zone entry, logbook mismatch, and a suspicious activity email. What move would you make?',
         context: 'Security Breach - Perimeter Cameras',
         options: [
           { id: 'a', label: 'Update risk register to High.', score: 0, feedback: 'Updating is useful, but the threat may now exceed normal project authority.' },
@@ -1048,12 +949,12 @@ const petroNovaStages = {
         id: 'petro-reflect-1',
         context: 'Sources of Risk',
         prompt: 'When conducting risk identification at PetroNova, which are valid sources of identifying potential risks?',
-        correctOptionIds: ['a', 'b', 'd'],
+        correctOptionIds: ['a', 'c', 'd'],
         hint: 'Think about evidence sources, structured analysis, and compliance obligations. Watch out for internal versus external environment wording.',
         options: [
           { id: 'a', label: 'Lessons learned from similar refinery projects' },
-          { id: 'b', label: 'Conducting a SWOT analysis of the project environment' },
-          { id: 'c', label: 'Conducting a PESTLE analysis to understand the internal project environment' },
+          { id: 'b', label: 'Conducting a PESTLE analysis to understand the internal project environment' },
+          { id: 'c', label: 'Conducting a SWOT analysis of the project environment' },
           { id: 'd', label: 'Reviewing regulatory and environmental compliance requirements' },
         ],
       },
@@ -1061,12 +962,12 @@ const petroNovaStages = {
         id: 'petro-reflect-2',
         context: 'VUCA Environment',
         prompt: 'Which items correspond to VUCA elements relevant to PetroNova risk identification?',
-        correctOptionIds: ['a', 'b', 'd'],
+        correctOptionIds: ['b', 'c', 'd'],
         hint: 'Match each choice to the VUCA concept. Complexity is about interdependent interactions, not just availability changes.',
         options: [
-          { id: 'a', label: 'Volatility - Frequent, large swings in global oil prices' },
-          { id: 'b', label: 'Uncertainty - Unclear timing and scope of future emission regulations' },
-          { id: 'c', label: 'Complexity - Availability of spare parts from multiple global suppliers leading to changing stock levels' },
+          { id: 'a', label: 'Complexity - Availability of spare parts from multiple global suppliers leading to changing stock levels' },
+          { id: 'b', label: 'Volatility - Frequent, large swings in global oil prices' },
+          { id: 'c', label: 'Uncertainty - Unclear timing and scope of future emission regulations' },
           { id: 'd', label: 'Ambiguity - Poorly-defined safety responsibilities between PetroNova and the EPC contractor' },
         ],
       },
@@ -1074,13 +975,13 @@ const petroNovaStages = {
         id: 'petro-reflect-3',
         context: 'Creative Risk Identification',
         prompt: 'Which creative techniques can the team use at the beginning of the PetroNova project to identify risks?',
-        correctOptionIds: ['a', 'b', 'd'],
+        correctOptionIds: ['a', 'b', 'c'],
         hint: 'Early planning benefits from cross-functional creativity, structured breakdowns, and prompt lists.',
         options: [
           { id: 'a', label: 'Brainstorming with cross-functional experts' },
           { id: 'b', label: 'Risk Breakdown Structures (RBS)' },
-          { id: 'c', label: 'Risk data collection at the project deployment phase' },
-          { id: 'd', label: 'Prompt lists such as PESTLE and SWOT' },
+          { id: 'c', label: 'Prompt lists such as PESTLE and SWOT' },
+          { id: 'd', label: 'Risk data collection at the project deployment phase' },
         ],
       },
     ],
@@ -1118,10 +1019,10 @@ const petroNovaRefinery = {
         title: 'Risk Identification Briefing',
         label: 'Stage 1 video',
         videoSrc: '/videos/petronova-risk-identification.mp4',
-        summary: 'Walk through the site, project office, and strategy room to interpret hidden PetroNova risk signals. Tap each hotspot decision into or out of the risk register.',
+        summary: 'Walk through the site, project office, and strategy room to interpret 10 PetroNova signals: 8 strong risks and 2 decoys. Tap each hotspot decision into or out of the risk register.',
       },
       risks: petroNovaIdentificationRisks,
-      requiredSelections: 15,
+      requiredSelections: 8,
     },
     { id: 'petro-reflection', type: 'multiQuiz', ...petroNovaStages.reflection },
     {
@@ -1179,7 +1080,7 @@ const novaTechIdentificationRisks = [
     scenario: 'Data Centre Walkthrough - PESTLE',
     scenarioTag: 'PESTLE',
     title: 'Cybersecurity breach vector',
-    signal: 'Contractor uses a personal USB stick. Cue: "Unapproved device detected."',
+    signal: 'Contractor uses a personal Universal Serial Bus stick. Cue: "Unapproved device detected."',
     isRisk: true,
     insight: 'Unapproved removable media can introduce malware or data exfiltration pathways.',
   },
@@ -1251,7 +1152,7 @@ const novaTechIdentificationRisks = [
     scenario: 'Strategy Meeting - VUCA',
     scenarioTag: 'VUCA',
     title: 'External shock causing service outage',
-    signal: 'News report: "Major cyberattack disrupts global DNS provider."',
+    signal: 'News report: "Major cyberattack disrupts global Domain Name System provider."',
     isRisk: true,
     insight: 'External provider shocks can interrupt platform availability.',
   },
@@ -1269,7 +1170,7 @@ const novaTechIdentificationRisks = [
 const novaTechAnalysisRisks = [
   {
     id: 'nova-analysis-usb-breach',
-    title: 'Cyber breach via contractor USB',
+    title: 'Cyber breach via contractor Universal Serial Bus device',
     signal: 'Unapproved device used in data centre. Clue: sector has rising insider threats.',
     probability: 3,
     impact: 5,
@@ -1304,8 +1205,8 @@ const novaTechAnalysisRisks = [
   },
   {
     id: 'nova-analysis-dns',
-    title: 'DNS provider outage',
-    signal: 'External cyberattack. Clue: global DNS provider news alert.',
+    title: 'Domain Name System provider outage',
+    signal: 'External cyberattack. Clue: global Domain Name System provider news alert.',
     probability: 2,
     impact: 4,
   },
@@ -1342,15 +1243,15 @@ const novaTechAnalysisRisks = [
 const novaTechResponseRisks = [
   {
     id: 'nova-response-usb',
-    title: 'Cyber Breach via USB',
-    signal: 'A contractor uses an unapproved USB device inside the data centre.',
+    title: 'Cyber Breach via Universal Serial Bus Device',
+    signal: 'A contractor uses an unapproved Universal Serial Bus device inside the data centre.',
     response: 'Avoid',
     feedback: {
-      Avoid: 'Disabling USB storage and prohibiting personal USB devices removes an unnecessary attack vector from the migration environment.',
-      Mitigate: 'Endpoint detection, USB scanning, device control, malware protection, and monitoring reduce exposure for permitted media.',
+      Avoid: 'Disabling Universal Serial Bus storage and prohibiting personal Universal Serial Bus devices removes an unnecessary attack vector from the migration environment.',
+      Mitigate: 'Endpoint detection, Universal Serial Bus scanning, device control, malware protection, and monitoring reduce exposure for permitted media.',
       Transfer: 'Contractor cybersecurity obligations and indemnities shift some liability but do not prevent compromise.',
-      Accept: 'Limited USB use is acceptable only when scanned and assessed as low residual risk.',
-      Escalate: 'Any attempted or suspected USB-based compromise should go immediately to the CISO or incident response team.',
+      Accept: 'Limited Universal Serial Bus use is acceptable only when scanned and assessed as low residual risk.',
+      Escalate: 'Any attempted or suspected Universal Serial Bus-based compromise should go immediately to the Chief Information Security Officer or incident response team.',
     },
   },
   {
@@ -1360,7 +1261,7 @@ const novaTechResponseRisks = [
     response: 'Mitigate',
     feedback: {
       Avoid: 'Replacing the highest-risk legacy components is useful where direct integration cannot work, but not every legacy system can be removed immediately.',
-      Mitigate: 'Staged migration, APIs, sandboxes, integration tests, automated regression testing, rollback, and phased releases best balance continuity and transformation.',
+      Mitigate: 'Staged migration, application programming interfaces, sandboxes, integration tests, automated regression testing, rollback, and phased releases best balance continuity and transformation.',
       Transfer: 'Specialist migration partners can support complex systems, but architecture risk remains with NovaTech.',
       Accept: 'Only isolated early-development defects should be accepted when production services are unaffected.',
       Escalate: 'Escalate components that fail security, performance, or compatibility requirements to architecture governance.',
@@ -1386,7 +1287,7 @@ const novaTechResponseRisks = [
     response: 'Avoid',
     feedback: {
       Avoid: 'Preventing new reliance on unsupported libraries and replacing critical end-of-life dependencies designs out unsupported-software exposure.',
-      Mitigate: 'SBOM tracking, advisory monitoring, vulnerability scanning, and scheduled upgrades reduce dependency risk.',
+      Mitigate: 'Software Bill of Materials tracking, advisory monitoring, vulnerability scanning, and scheduled upgrades reduce dependency risk.',
       Transfer: 'Commercially supported versions or vendors can provide maintenance and patches for critical dependencies.',
       Accept: 'Temporary retention needs documented approval and only fits when replacement creates greater immediate operational risk.',
       Escalate: 'Critical unpatched dependencies that cannot be replaced in time should go to security and architecture governance.',
@@ -1400,21 +1301,21 @@ const novaTechResponseRisks = [
     feedback: {
       Avoid: 'Moving suitable workloads to distributed cloud or alternative facilities reduces private data-centre dependency, but may not fit every workload.',
       Mitigate: 'Redundant cooling, temperature sensors, backup power, automated alerts, maintenance, and emergency shutdown reduce overheating risk.',
-      Transfer: 'Specialist data-centre maintenance with availability, maintenance, and response SLAs shifts operational and financial consequences from the core project team.',
+      Transfer: 'Specialist data-centre maintenance with availability, maintenance, and response service level agreements shifts operational and financial consequences from the core project team.',
       Accept: 'Brief low-temperature excursions are acceptable only when monitoring confirms equipment stays within safe limits.',
       Escalate: 'Cooling failure affecting critical workloads should go to infrastructure leadership and major-incident management.',
     },
   },
   {
     id: 'nova-response-dns',
-    title: 'DNS Provider Outage',
-    signal: 'A global DNS provider disruption threatens platform availability.',
+    title: 'Domain Name System Provider Outage',
+    signal: 'A global Domain Name System provider disruption threatens platform availability.',
     response: 'Avoid',
     feedback: {
-      Avoid: 'Designing around multiple independent DNS providers or resilient DNS architecture removes single-provider dependency.',
-      Mitigate: 'Health checks, DNS monitoring, short TTLs, and failover procedures reduce outage impact.',
-      Transfer: 'High-availability SLAs and service credits provide compensation but do not remove unreachability.',
-      Accept: 'Short DNS interruptions are acceptable only within approved service tolerance.',
+      Avoid: 'Designing around multiple independent Domain Name System providers or resilient Domain Name System architecture removes single-provider dependency.',
+      Mitigate: 'Health checks, Domain Name System monitoring, short Time To Live values, and failover procedures reduce outage impact.',
+      Transfer: 'High-availability service level agreements and service credits provide compensation but do not remove unreachability.',
+      Accept: 'Short Domain Name System interruptions are acceptable only within approved service tolerance.',
       Escalate: 'A prolonged or widespread outage belongs with major-incident management and executive technology leadership.',
     },
   },
@@ -1425,8 +1326,8 @@ const novaTechResponseRisks = [
     response: 'Avoid',
     feedback: {
       Avoid: 'Mandatory automated quality gates and minimum coverage prevent code from reaching production in a known high-defect state.',
-      Mitigate: 'Expanding unit, integration, regression, and security tests with CI/CD reduces defect leakage.',
-      Transfer: 'Specialist QA providers can independently test high-risk components, but quality ownership remains with the programme.',
+      Mitigate: 'Expanding unit, integration, regression, and security tests with Continuous Integration and Continuous Delivery reduces defect leakage.',
+      Transfer: 'Specialist quality assurance providers can independently test high-risk components, but quality ownership remains with the programme.',
       Accept: 'Manual testing is acceptable only for low-risk components where automation is disproportionate.',
       Escalate: 'Releases failing mandatory thresholds should go to the technical change authority.',
     },
@@ -1450,9 +1351,9 @@ const novaTechResponseRisks = [
     signal: 'Vendor and architect disagree over incident-response ownership.',
     response: 'Avoid',
     feedback: {
-      Avoid: 'A clear RACI and incident-management framework before migration prevents ownership disputes during live recovery.',
+      Avoid: 'A clear responsible, accountable, consulted, and informed matrix and incident-management framework before migration prevents ownership disputes during live recovery.',
       Mitigate: 'Joint incident exercises, shared runbooks, and formal escalation channels reduce confusion.',
-      Transfer: 'Contractual SLAs and service-management obligations can allocate vendor duties, but internal accountability still matters.',
+      Transfer: 'Contractual service level agreements and service-management obligations can allocate vendor duties, but internal accountability still matters.',
       Accept: 'Minor uncertainty is acceptable only for non-critical incidents where recovery is unaffected.',
       Escalate: 'Unresolved live major-incident disputes should go to the designated executive incident authority.',
     },
@@ -1467,7 +1368,7 @@ const novaTechResponseRisks = [
       Mitigate: 'Privacy-by-design, classification, encryption, retention, data residency, and regulatory monitoring reduce compliance risk.',
       Transfer: 'Legal/privacy advice and cloud-provider obligations support the response but do not make the engineering decision alone.',
       Accept: 'Minor uncertainty is acceptable only where existing controls remain compliant and there is no material effect.',
-      Escalate: 'Material regulatory change affects architecture, data location, and lawful processing, so DPO, legal/compliance, and steering committee involvement is required.',
+      Escalate: 'Material regulatory change affects architecture, data location, and lawful processing, so Data Protection Officer, legal/compliance, and steering committee involvement is required.',
     },
   },
 ];
@@ -1487,7 +1388,7 @@ const novaTechMonitoringStage = {
       prompt: 'Cyber threat dashboard shows a spike in failed login attempts across privileged accounts. What should the team do?',
       context: 'Cyber Threat Dashboard',
       options: [
-        { id: 'a', label: 'Escalate to SOC and update risk register.', score: 10, feedback: 'This improves compliance and resilience while keeping the risk picture current.' },
+        { id: 'a', label: 'Escalate to the Security Operations Centre and update risk register.', score: 10, feedback: 'This improves compliance and resilience while keeping the risk picture current.' },
         { id: 'b', label: 'Assume users forgot passwords and wait.', score: 0, feedback: 'Waiting can turn weak signals into a breach.' },
         { id: 'c', label: 'Close the risk as normal login noise.', score: 0, feedback: 'Closing too early can hide an active attack pattern.' },
         { id: 'd', label: 'Delete failed-login logs to reduce alert volume.', score: 0, feedback: 'Removing evidence weakens investigation and accountability.' },
@@ -1692,6 +1593,14 @@ export function getRiskHeat(score) {
   return { label: 'Low', className: 'heat-low' };
 }
 
+function getRiskHeatLevel(score) {
+  if (score >= 16) return 4;
+  if (score >= 12) return 3;
+  if (score >= 8) return 2;
+  if (score >= 4) return 1;
+  return 0;
+}
+
 export function gradeAnalysisPlacement(risk, placement) {
   if (!placement) return { score: 0, label: 'Not placed', className: 'almost' };
 
@@ -1701,18 +1610,25 @@ export function gradeAnalysisPlacement(risk, placement) {
   const expectedScore = risk.riskScore;
   const scoreGap = Math.abs(selectedScore - expectedScore);
   const axisGap = Math.abs(selectedProbability - risk.probability) + Math.abs(selectedImpact - risk.impact);
-  const selectedHeat = getRiskHeat(selectedScore).label;
-  const expectedHeat = getRiskHeat(expectedScore).label;
+  const heatGap = Math.abs(getRiskHeatLevel(selectedScore) - getRiskHeatLevel(expectedScore));
 
-  if (selectedScore === expectedScore && axisGap <= 1) {
-    return { score: 10, label: 'Full score', className: 'correct' };
+  if (axisGap === 0) {
+    return { score: 5, label: 'Strong decision', className: 'correct' };
   }
 
-  if (scoreGap <= 4 || selectedHeat === expectedHeat || axisGap <= 2) {
-    return { score: 5, label: 'Good decision', className: 'good' };
+  if (axisGap <= 1 || (scoreGap <= 2 && heatGap === 0)) {
+    return { score: 4, label: 'Well supported', className: 'correct' };
   }
 
-  return { score: 2, label: 'Almost there', className: 'almost' };
+  if (axisGap <= 2 || heatGap === 0 || scoreGap <= 5) {
+    return { score: 3, label: 'Reasonable range', className: 'good' };
+  }
+
+  if (axisGap <= 4 || heatGap <= 1 || scoreGap <= 10) {
+    return { score: 2, label: 'Needs calibration', className: 'almost' };
+  }
+
+  return { score: 1, label: 'Far from indicative', className: 'almost' };
 }
 
 const responseJudgement = {
@@ -1744,7 +1660,7 @@ export function gradeQuizOption(question, selectedOption, stage = {}) {
 
   const rawScore = Number(selectedOption.score || 0);
   const score = stage.useExactOptionScores ? rawScore : (rawScore > 0 ? rawScore : 2);
-  const label = score >= 10 ? 'Correct' : score >= 5 ? 'Acceptable' : stage.useExactOptionScores ? 'Wrong' : 'Almost there';
+  const label = score >= 10 ? 'Strong decision' : score >= 5 ? 'Acceptable' : stage.useExactOptionScores ? 'Needs review' : 'Almost there';
   const className = score >= 10 ? 'correct' : score >= 5 ? 'good' : 'almost';
 
   return { score, label, className };
@@ -1759,7 +1675,7 @@ export function gradeMultiQuizAnswer(question, selectedIds = []) {
 
   return {
     score,
-    label: exactMatch ? 'Correct' : 'Almost there',
+    label: exactMatch ? 'Best supported choice' : 'Almost there',
     className: exactMatch ? 'correct' : 'almost',
   };
 }
@@ -1790,7 +1706,7 @@ export function calculateStageScore(stage, stageState = {}) {
     }, 0);
     return {
       score,
-      maxScore: stage.risks.length * 10,
+      maxScore: stage.risks.length * 5,
       details: `${Object.keys(placements).length}/${stage.risks.length} risks placed with R = P x I`,
     };
   }

@@ -19,6 +19,7 @@ import {
 import { assetUrl } from './data/cloudinaryAssets.js';
 
 const STORAGE_KEY = 'riskmaster-staged-simulator-state-v4';
+const MUSIC_VOLUME_STORAGE_KEY = 'riskmaster-background-music-volume';
 const FEATURED_CATEGORY_ID = 'automobile';
 const DEFAULT_STATE = {
   selectedCategoryId: 'automobile',
@@ -70,10 +71,33 @@ function loadInitialState() {
   }
 }
 
+function clampMusicVolume(value) {
+  const volume = Number(value);
+  if (!Number.isFinite(volume)) return 0.32;
+  return Math.max(0, Math.min(1, volume));
+}
+
+function loadInitialMusicVolume() {
+  try {
+    const saved = window.localStorage.getItem(MUSIC_VOLUME_STORAGE_KEY);
+    return saved === null ? 0.32 : clampMusicVolume(saved);
+  } catch {
+    return 0.32;
+  }
+}
+
+function applyMusicVolume(music, volume) {
+  if (!music) return;
+  const nextVolume = clampMusicVolume(volume);
+  music.volume = nextVolume;
+  music.defaultMuted = false;
+  music.muted = nextVolume <= 0;
+}
+
 function App() {
   const [state, setState] = useState(loadInitialState);
   const [answerFlash, setAnswerFlash] = useState('');
-  const [musicVolume, setMusicVolume] = useState(0.32);
+  const [musicVolume, setMusicVolume] = useState(loadInitialMusicVolume);
   const musicRef = useRef(null);
 
   const category = getCategoryById(state.selectedCategoryId);
@@ -91,8 +115,7 @@ function App() {
     const music = musicRef.current;
     if (!music) return;
 
-    music.volume = musicVolume;
-    music.muted = musicVolume === 0;
+    applyMusicVolume(music, musicVolume);
     if (!canPlayMusic) {
       music.pause();
       return;
@@ -104,15 +127,22 @@ function App() {
   }, [canPlayMusic, musicSrc, musicVolume]);
 
   const handleMusicVolumeChange = (event) => {
-    const nextVolume = Number(event.target.value) / 100;
+    const nextVolume = clampMusicVolume(Number(event.currentTarget.value) / 100);
     const music = musicRef.current;
 
     setMusicVolume(nextVolume);
+    try {
+      window.localStorage.setItem(MUSIC_VOLUME_STORAGE_KEY, String(nextVolume));
+    } catch {
+      // Keep the live volume even if storage is unavailable.
+    }
 
     if (music) {
-      music.volume = nextVolume;
-      music.muted = nextVolume === 0;
+      applyMusicVolume(music, nextVolume);
       if (canPlayMusic && nextVolume > 0) {
+        if (music.readyState === 0) {
+          music.load();
+        }
         music.play().catch(() => {});
       }
     }
@@ -248,7 +278,7 @@ function App() {
 
   return (
     <div className="app-shell" style={{ '--category-accent': category.accent, '--category-tint': category.tint }}>
-      <audio ref={musicRef} src={musicSrc} loop preload="auto" />
+      <audio ref={musicRef} key={musicSrc} src={musicSrc} loop preload="auto" />
       <header className="mobile-header">
         <button className="brand-mark" type="button" onClick={resetHome} aria-label="Back to RiskMaster home">
           <i className="bx bx-shield-quarter" aria-hidden="true" />
@@ -259,7 +289,7 @@ function App() {
         </div>
         {state.screen !== 'home' ? (
           <label className="audio-control">
-            <i className="bx bx-volume-full" aria-hidden="true" />
+            <i className={`bx ${musicVolume <= 0 ? 'bx-volume-mute' : 'bx-volume-full'}`} aria-hidden="true" />
             <input
               type="range"
               min="0"
@@ -267,9 +297,11 @@ function App() {
               value={Math.round(musicVolume * 100)}
               onInput={handleMusicVolumeChange}
               onChange={handleMusicVolumeChange}
+              disabled={!canPlayMusic}
               aria-label="Background music volume"
+              aria-valuetext={canPlayMusic ? `${Math.round(musicVolume * 100)} percent` : 'Background music paused during video briefing'}
             />
-            <span>{Math.round(musicVolume * 100)}%</span>
+            <span>{canPlayMusic ? `${Math.round(musicVolume * 100)}%` : 'Paused'}</span>
           </label>
         ) : null}
         <span className="header-score">{state.screen === 'home' ? `${categories.length} Packs` : `${finalScore.percentage}%`}</span>
@@ -538,11 +570,11 @@ function ActivityScreen(props) {
 function InstructionPanel({ stage }) {
   const copy = {
     briefing: 'Review the written brief as well as the video, then continue to the next stage when the project context is clear.',
-    identify: 'Read each signal, decide whether it is a material project risk, then tap the option that should go into the risk register.',
+    identify: 'Decide whether each signal is a material project risk, then tap the option that should go into the risk register.',
     analysis: 'Tap one heatmap cell for each risk. Probability is rated 1-5 from very low to very high. Impact is rated 1-5 from negligible to catastrophic. The risk score is Probability x Impact.',
     response: 'Read the specific risk signal, compare the five response strategies, then tap the response you would use for that exposure.',
     quiz: 'Read the live scenario, choose the next action, then continue after your decision is recorded.',
-    multiQuiz: 'Select every option that applies to the reflection prompt, then continue once your selections are recorded.',
+    multiQuiz: 'Select all options that apply to the reflection prompt, then continue once your selections are recorded.',
   };
   const instruction = stage.instructions || copy[stage.type] || copy.briefing;
 
@@ -555,12 +587,13 @@ function InstructionPanel({ stage }) {
 }
 
 function IdentificationActivity({ category, stage, stageState, itemIndex, setItemIndex, updateStageState, onBack, onFinish }) {
-  const item = stage.risks[itemIndex];
+  const risks = useMemo(() => getStableShuffledItems(stage.risks, stage.id), [stage]);
+  const item = risks[itemIndex];
   const decisions = stageState.decisions || {};
   const decision = decisions[item.id];
   const selectedCount = Object.values(decisions).filter(Boolean).length;
   const answeredCount = Object.keys(decisions).length;
-  const complete = answeredCount === stage.risks.length;
+  const complete = answeredCount === risks.length;
 
   const choose = (value) => {
     updateStageState(stage.id, (current) => ({
@@ -583,7 +616,7 @@ function IdentificationActivity({ category, stage, stageState, itemIndex, setIte
 
   return (
     <section className="simulation-screen page-enter">
-      <ActivityTopbar itemIndex={itemIndex} totalItems={stage.risks.length} onBack={onBack} />
+      <ActivityTopbar itemIndex={itemIndex} totalItems={risks.length} onBack={onBack} />
       <article key={item.id} className="question-card question-enter">
         <StageHeader category={category} stage={stage} />
         <InstructionPanel stage={stage} />
@@ -617,10 +650,10 @@ function IdentificationActivity({ category, stage, stageState, itemIndex, setIte
         <button
           className="primary-action"
           type="button"
-          onClick={() => (itemIndex === stage.risks.length - 1 ? onFinish() : setItemIndex(itemIndex + 1))}
-          disabled={decision === undefined || (itemIndex === stage.risks.length - 1 && !complete)}
+          onClick={() => (itemIndex === risks.length - 1 ? onFinish() : setItemIndex(itemIndex + 1))}
+          disabled={decision === undefined || (itemIndex === risks.length - 1 && !complete)}
         >
-          {itemIndex === stage.risks.length - 1 ? `Score stage (${selectedCount} selected)` : 'Next signal'}
+          {itemIndex === risks.length - 1 ? `Score stage (${selectedCount} selected)` : 'Next signal'}
         </button>
       </div>
     </section>
@@ -690,7 +723,7 @@ function AnalysisActivity({ category, stage, stageState, itemIndex, setItemIndex
           </div>
           <div>
             <strong>Risk Score</strong>
-            <p>R = Probability x Impact. Exact fit earns 10, close range earns 5, and a weaker but attempted judgement earns 2.</p>
+            <p>R = Probability x Impact. Placements earn 5, 4, 3, 2, or 1 based on how closely the Probability, Impact, score, and heat band match the indicative assessment.</p>
           </div>
         </div>
         <div className="mini-actions">
@@ -992,10 +1025,6 @@ function MultiQuizActivity({ category, stage, stageState, itemIndex, setItemInde
 
 function StageScoreScreen({ category, stage, stageState, stageScore, finalScore, onBack, onNext, isLastStage }) {
   const percentage = stageScore.maxScore ? Math.round((stageScore.score / stageScore.maxScore) * 100) : 0;
-  const selectedRiskIds = stage.type === 'identify' ? stageScore.correctRiskIds || [] : [];
-  const selectedRegisterRisks = stage.type === 'identify'
-    ? stage.risks.filter((risk) => risk.isRisk && selectedRiskIds.includes(risk.id))
-    : [];
 
   return (
     <section className="results-screen page-enter">
@@ -1038,33 +1067,7 @@ function StageScoreScreen({ category, stage, stageState, stageScore, finalScore,
           </>
         )}
       </div>
-      {stage.type === 'identify' ? (
-        <div className="review-list">
-          {selectedRegisterRisks.map((risk) => (
-            <article key={risk.id} className="review-card">
-              <span>{risk.scenarioTag || 'Risk'}</span>
-              <div>
-                <strong>{risk.title}</strong>
-                <p>{risk.insight}</p>
-              </div>
-              <em>Register</em>
-            </article>
-          ))}
-          {!selectedRegisterRisks.length ? (
-            <article className="review-card">
-              <span>Register</span>
-              <div>
-                <strong>No confirmed risks captured yet</strong>
-                <p>Review the stage and look for stronger project risk signals.</p>
-              </div>
-              <em>0</em>
-            </article>
-          ) : null}
-        </div>
-      ) : null}
-      {stage.type !== 'identify' ? (
-        <StageAnswerReview stage={stage} stageState={stageState} />
-      ) : null}
+      <StageAnswerReview stage={stage} stageState={stageState} />
       <div className="sticky-actions">
         <button className="secondary-action" type="button" onClick={onBack}>
           <i className="bx bx-revision" aria-hidden="true" />
@@ -1080,6 +1083,47 @@ function StageScoreScreen({ category, stage, stageState, stageScore, finalScore,
 }
 
 function StageAnswerReview({ stage, stageState }) {
+  if (stage.type === 'identify') {
+    const decisions = stageState.decisions || {};
+    return (
+      <div className="review-list">
+        {getStableShuffledItems(stage.risks, `${stage.id}-review`).map((risk) => {
+          const selected = decisions[risk.id] === true;
+          const answered = decisions[risk.id] !== undefined;
+          const isTruePositive = risk.isRisk && selected;
+          const isMissedRisk = risk.isRisk && answered && !selected;
+          const isFalsePositive = !risk.isRisk && selected;
+          const label = isTruePositive
+            ? 'Strong decision'
+            : isMissedRisk
+              ? 'Missed risk'
+              : isFalsePositive
+                ? 'False positive'
+                : 'Best supported choice';
+          const className = isTruePositive || (!risk.isRisk && answered && !selected) ? 'correct' : 'almost';
+          const assessment = risk.isRisk
+            ? 'This is a true risk because the signal can affect project objectives such as safety, cost, schedule, quality, compliance, continuity, or reputation.'
+            : 'This is a false positive because the signal is incidental or too immaterial to justify a risk-register entry on its own.';
+          const userDecision = selected ? 'Added to risk register' : answered ? 'Not added to risk register' : 'No decision recorded';
+
+          return (
+            <article key={risk.id} className={`review-card ${className}`}>
+              <span>{label}</span>
+              <div>
+                <strong>{risk.title}</strong>
+                <p>Your decision: {userDecision}. {assessment}</p>
+                <p className="correct-answer">
+                  Rationale: {risk.insight}
+                </p>
+              </div>
+              <em>{risk.isRisk ? (selected ? '+1' : 'Missed') : (selected ? '-1' : 'Parked')}</em>
+            </article>
+          );
+        })}
+      </div>
+    );
+  }
+
   if (stage.type === 'analysis') {
     const placements = stageState.placements || {};
     return (
@@ -1088,7 +1132,6 @@ function StageAnswerReview({ stage, stageState }) {
           const placement = placements[risk.id];
           const selectedScore = placement ? Number(placement.probability) * Number(placement.impact) : 0;
           const grade = gradeAnalysisPlacement(risk, placement);
-          const needsCorrection = grade.score < 10;
           return (
             <article key={risk.id} className={`review-card ${grade.className}`}>
               <span>{grade.label}</span>
@@ -1096,13 +1139,11 @@ function StageAnswerReview({ stage, stageState }) {
                 <strong>{risk.title}</strong>
                 <p>
                   Your score: {placement ? `${selectedScore} (P${placement.probability} x I${placement.impact})` : 'Not placed'}.
-                  Review the signal, probability, and impact scale before retrying the placement.
+                  Probability and impact are relative 1-5 scales; the judgement is subjective and should reflect individual risk appetite, organisational risk thresholds, and the available evidence.
                 </p>
-                {needsCorrection ? (
-                  <p className="correct-answer">
-                    Correct answer: P{risk.probability} x I{risk.impact} = {risk.riskScore}. This fits the evidence: {risk.signal}
-                  </p>
-                ) : null}
+                <p className="correct-answer">
+                  Indicative assessment: P{risk.probability} x I{risk.impact} = {risk.riskScore}. Rationale: {risk.signal}
+                </p>
               </div>
               <em>+{grade.score}</em>
             </article>
@@ -1121,16 +1162,13 @@ function StageAnswerReview({ stage, stageState }) {
           const grade = gradeRiskResponse(risk, selected);
           const selectedFeedback = selected ? risk.feedback?.[selected] : '';
           const correctFeedback = risk.feedback?.[risk.response] || '';
-          const needsCorrection = selected !== risk.response;
           return (
             <article key={risk.id} className={`review-card ${grade.className}`}>
               <span>{grade.label}</span>
               <div>
                 <strong>{risk.title}</strong>
                 <p>Your response: {selected || 'None'}. {selectedFeedback || 'Review the risk signal and strategy definitions before retrying.'}</p>
-                {needsCorrection ? (
-                  <p className="correct-answer">Correct answer: {risk.response}. {correctFeedback}</p>
-                ) : null}
+                <p className="correct-answer">Best option: {risk.response}. {correctFeedback}</p>
               </div>
               <em>+{grade.score}</em>
             </article>
@@ -1150,16 +1188,14 @@ function StageAnswerReview({ stage, stageState }) {
           const correctOption = question.options.reduce((best, option) => (
             Number(option.score || 0) > Number(best?.score || 0) ? option : best
           ), question.options[0]);
-          const needsCorrection = selected?.id !== correctOption?.id;
+          const bestLabel = stage.title === 'Issue Management' ? 'Best option' : 'Best supported choice';
           return (
             <article key={question.id} className={`review-card ${grade.className}`}>
               <span>{grade.label}</span>
               <div>
                 <strong>{question.context}</strong>
                 <p>Your answer: {selected?.label || 'None'}. {selected?.feedback || 'Use the scenario evidence to retry the decision if needed.'}</p>
-                {needsCorrection ? (
-                  <p className="correct-answer">Correct answer: {correctOption?.label}. {correctOption?.feedback}</p>
-                ) : null}
+                <p className="correct-answer">{bestLabel}: {correctOption?.label}. {correctOption?.feedback}</p>
               </div>
               <em>+{grade.score}</em>
             </article>
@@ -1179,18 +1215,15 @@ function StageAnswerReview({ stage, stageState }) {
           const expectedIds = question.correctOptionIds || [];
           const selectedLabels = question.options.filter((option) => selectedIds.includes(option.id)).map((option) => option.label);
           const correctLabels = question.options.filter((option) => expectedIds.includes(option.id)).map((option) => option.label);
-          const correct = grade.score === 10;
           return (
             <article key={question.id} className={`review-card ${grade.className}`}>
               <span>{grade.label}</span>
               <div>
                 <strong>{question.context}</strong>
                 <p>Your answers: {selectedLabels.join('; ') || 'None'}. Revisit the briefing evidence if you want to improve the score.</p>
-                {!correct ? (
-                  <p className="correct-answer">
-                    Correct answers: {correctLabels.join('; ')}. {question.hint || 'These options best match the stage briefing evidence.'}
-                  </p>
-                ) : null}
+                <p className="correct-answer">
+                  Best supported choices: {correctLabels.join('; ')}. {question.hint || 'These options best match the stage briefing evidence.'}
+                </p>
               </div>
               <em>+{grade.score}</em>
             </article>
@@ -1204,26 +1237,38 @@ function StageAnswerReview({ stage, stageState }) {
 }
 
 function FinalScoreScreen({ category, playableStages, stageStates, finalScore, finalBand, onRetry, onHome, onOtherGames }) {
-  const petals = Array.from({ length: 22 }, (_, index) => index);
-  const celebrationIcons = ['🎉', '🚀', '🎊', '🎁', '🎈'];
+  const ribbons = Array.from({ length: 28 }, (_, index) => index);
+  const [showRibbons, setShowRibbons] = useState(true);
+
+  useEffect(() => {
+    setShowRibbons(true);
+    const timeout = window.setTimeout(() => setShowRibbons(false), 300000);
+    return () => window.clearTimeout(timeout);
+  }, [category.id]);
 
   return (
     <section className="results-screen page-enter">
-      <div className="result-hero final-celebration">
-        <div className="petal-field" aria-hidden="true">
-          {petals.map((petal) => (
-            <span key={petal} style={{ '--petal-index': petal }} />
-          ))}
-        </div>
+      <div className={`result-hero final-celebration final-theme-${category.id}`}>
+        {showRibbons ? (
+          <div className="petal-field" aria-hidden="true">
+            {ribbons.map((ribbon) => (
+              <span
+                key={ribbon}
+                style={{
+                  '--petal-index': ribbon,
+                  '--ribbon-left': `${(ribbon * 37) % 100}%`,
+                  '--ribbon-delay': `${ribbon * -0.27}s`,
+                  '--ribbon-duration': `${5 + (ribbon % 9) * 0.42}s`,
+                }}
+              />
+            ))}
+          </div>
+        ) : null}
+        <div className="final-trophy" aria-hidden="true">🏆</div>
         <h1 className="final-title">
           <span className="congratulations-text">Congratulations</span>
-          <span className="celebration-icons" aria-hidden="true">
-            {celebrationIcons.map((icon, index) => (
-              <i key={icon} style={{ '--icon-index': index }}>{icon}</i>
-            ))}
-          </span>
         </h1>
-        <p className="final-message">You've earned a badge</p>
+        <p className="final-message">You've earned a distinction</p>
 
         <div className="result-actions final-actions">
           <button className="secondary-action" type="button" onClick={onHome}>
@@ -1240,14 +1285,14 @@ function FinalScoreScreen({ category, playableStages, stageStates, finalScore, f
           </button>
         </div>
 
-        <div className="earned-badge">
+        <div className="earned-distinction">
           <span className="category-icon large">{category.icon}</span>
           <div className="score-ring" style={{ '--score': `${finalScore.percentage}%` }}>
             <strong>{finalScore.percentage}%</strong>
             <span>{finalScore.score}/{finalScore.maxScore}</span>
           </div>
           <div>
-            <span className="eyebrow">Badge earned</span>
+            <span className="eyebrow">Distinction earned</span>
             <strong>{finalBand.label}</strong>
             <p>{finalBand.tagline}</p>
           </div>
@@ -1279,6 +1324,14 @@ function getStrategyOrder(strategies, seed) {
   return [...strategies].sort((left, right) => {
     const leftHash = hashString(`${seed}-${left}`);
     const rightHash = hashString(`${seed}-${right}`);
+    return leftHash - rightHash;
+  });
+}
+
+function getStableShuffledItems(items, seed) {
+  return [...items].sort((left, right) => {
+    const leftHash = hashString(`${seed}-${left.id}`);
+    const rightHash = hashString(`${seed}-${right.id}`);
     return leftHash - rightHash;
   });
 }

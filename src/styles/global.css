@@ -1190,11 +1190,45 @@ a {
   gap: 18px;
   min-height: min(680px, calc(100vh - 160px));
   justify-content: center;
+  isolation: isolate;
+  background:
+    linear-gradient(155deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.76)),
+    var(--category-tint);
 }
 
 .final-celebration > *:not(.petal-field) {
   position: relative;
   z-index: 1;
+}
+
+.final-theme-automobile {
+  --ribbon-one: #ff6b35;
+  --ribbon-two: #171827;
+  --ribbon-three: #fbbf24;
+  background:
+    radial-gradient(circle at 20% 18%, rgba(255, 107, 53, 0.18), transparent 32%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(255, 240, 232, 0.78) 48%, rgba(23, 24, 39, 0.1)),
+    #fff8f4;
+}
+
+.final-theme-oil-gas {
+  --ribbon-one: #0f9f6e;
+  --ribbon-two: #f59e0b;
+  --ribbon-three: #12352b;
+  background:
+    radial-gradient(circle at 80% 16%, rgba(15, 159, 110, 0.18), transparent 34%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(233, 255, 247, 0.8) 48%, rgba(245, 158, 11, 0.14)),
+    #f6fffb;
+}
+
+.final-theme-cybersecurity {
+  --ribbon-one: #7c3aed;
+  --ribbon-two: #06b6d4;
+  --ribbon-three: #111827;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(6, 182, 212, 0.18), transparent 34%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(243, 237, 255, 0.84) 48%, rgba(124, 58, 237, 0.12)),
+    #fbfaff;
 }
 
 .final-title {
@@ -1205,8 +1239,8 @@ a {
   max-width: 100%;
   margin: 0;
   color: #171827;
-  font-size: clamp(3.8rem, 10vw, 8.4rem);
-  line-height: 0.92;
+  font-size: 2.375rem;
+  line-height: 1.05;
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -1218,8 +1252,14 @@ a {
   word-break: break-word;
 }
 
+.final-trophy {
+  font-size: clamp(3rem, 7vw, 5rem);
+  line-height: 1;
+  filter: drop-shadow(0 12px 18px rgba(35, 31, 32, 0.18));
+}
+
 .congratulations-text {
-  font-size: clamp(2.6rem, 8vw, 7.4rem);
+  font-size: 2.375rem;
 }
 
 .celebration-icons {
@@ -1248,7 +1288,7 @@ a {
   justify-content: center;
 }
 
-.earned-badge {
+.earned-distinction {
   display: grid;
   grid-template-columns: auto auto minmax(0, 1fr);
   gap: 18px;
@@ -1264,20 +1304,20 @@ a {
   text-align: left;
 }
 
-.earned-badge > div:last-child {
+.earned-distinction > div:last-child {
   display: grid;
   gap: 8px;
   justify-items: center;
   text-align: center;
 }
 
-.earned-badge > div:last-child > strong {
+.earned-distinction > div:last-child > strong {
   color: #171827;
   font-size: clamp(1.8rem, 4vw, 3.2rem);
   line-height: 1;
 }
 
-.earned-badge p {
+.earned-distinction p {
   margin: 0;
   color: #4b5563;
 }
@@ -1293,15 +1333,19 @@ a {
 .petal-field span {
   position: absolute;
   top: -24px;
-  left: calc((var(--petal-index) * 53px) % 100%);
-  width: 14px;
-  height: 22px;
-  border-radius: 14px 2px 14px 2px;
-  background: hsl(calc(330 + (var(--petal-index) * 9)) 82% 72%);
-  opacity: 0.76;
+  left: var(--ribbon-left);
+  width: 10px;
+  height: 28px;
+  border-radius: 2px 8px 2px 8px;
+  background: var(--ribbon-one);
+  opacity: 0.82;
+  box-shadow:
+    12px -10px 0 -3px var(--ribbon-two),
+    -10px -18px 0 -4px var(--ribbon-three);
   transform: rotate(calc(var(--petal-index) * 21deg));
-  animation: petal-fall calc(5s + (var(--petal-index) * 0.18s)) linear infinite;
-  animation-delay: calc(var(--petal-index) * -0.28s);
+  animation: petal-fall var(--ribbon-duration) linear infinite;
+  animation-delay: var(--ribbon-delay);
+  will-change: transform, opacity;
 }
 
 @keyframes page-enter {
@@ -1362,13 +1406,18 @@ a {
 
 @keyframes petal-fall {
   0% {
-    transform: translate3d(0, -24px, 0) rotate(0deg);
+    opacity: 0;
+    transform: translate3d(0, -32px, 0) rotate(0deg);
+  }
+  12% {
+    opacity: 0.82;
   }
   50% {
-    transform: translate3d(34px, 210px, 0) rotate(180deg);
+    transform: translate3d(34px, 52vh, 0) rotate(180deg);
   }
   100% {
-    transform: translate3d(-18px, 520px, 0) rotate(360deg);
+    opacity: 0;
+    transform: translate3d(-18px, 108vh, 0) rotate(360deg);
   }
 }
 
@@ -1529,7 +1578,7 @@ a {
     grid-template-columns: 1fr;
   }
 
-  .earned-badge {
+  .earned-distinction {
     grid-template-columns: 1fr;
     justify-items: center;
     text-align: center;
@@ -1676,6 +1725,15 @@ a {
 .audio-control input {
   width: min(120px, 18vw);
   accent-color: var(--category-accent);
+}
+
+.audio-control input:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.audio-control:has(input:disabled) {
+  color: #6b7280;
 }
 
 .risk-title {
@@ -1858,6 +1916,10 @@ a {
     line-height: 1.08;
   }
 
+  .final-trophy {
+    font-size: clamp(2.5rem, 14vw, 3.6rem);
+  }
+
   .celebration-icons {
     gap: 6px;
     font-size: clamp(1.3rem, 7vw, 2rem);
@@ -1882,18 +1944,18 @@ a {
     padding-inline: 16px;
   }
 
-  .earned-badge {
+  .earned-distinction {
     width: 100%;
     gap: 14px;
     padding: 16px 12px;
   }
 
-  .earned-badge .score-ring {
+  .earned-distinction .score-ring {
     width: 132px;
     height: 132px;
   }
 
-  .earned-badge > div:last-child > strong {
+  .earned-distinction > div:last-child > strong {
     font-size: clamp(1.45rem, 8vw, 2.3rem);
   }
 }
